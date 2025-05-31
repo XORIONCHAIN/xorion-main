@@ -1,4 +1,4 @@
-use sc_chain_spec::ChainSpecExtension;
+use sc_chain_spec::{ChainSpecExtension, Properties};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use solochain_template_runtime::{Block, WASM_BINARY};
@@ -21,6 +21,11 @@ pub struct Extensions {
 /// Specialized `ChainSpec`.
 pub type ChainSpec = sc_service::GenericChainSpec<Extensions>;
 
+pub fn properties() -> Properties {
+    let mut properties = Properties::new();
+    properties.insert("tokenSymbol".into(), "XOR".into());
+    properties
+}
 pub fn development_chain_spec() -> Result<ChainSpec, String> {
     Ok(ChainSpec::builder(
         WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?,
@@ -30,6 +35,7 @@ pub fn development_chain_spec() -> Result<ChainSpec, String> {
     .with_id("dev")
     .with_chain_type(ChainType::Development)
     .with_genesis_config_preset_name(sp_genesis_builder::DEV_RUNTIME_PRESET)
+    .with_properties(properties())
     .build())
 }
 
@@ -41,6 +47,7 @@ pub fn local_chain_spec() -> Result<ChainSpec, String> {
     .with_name("Local Testnet")
     .with_id("local_testnet")
     .with_chain_type(ChainType::Local)
+    .with_properties(properties())
     .with_genesis_config_preset_name(sp_genesis_builder::LOCAL_TESTNET_RUNTIME_PRESET)
     .build())
 }
