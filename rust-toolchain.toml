@@ -1,0 +1,4 @@
+[toolchain]
+channel = "nightly"
+components = ["cargo", "clippy", "rustc", "rustfmt", "rust-src"]
+targets = ["wasm32-unknown-unknown", "wasm32v1-none"]
