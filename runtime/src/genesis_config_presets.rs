@@ -1,6 +1,7 @@
 use crate::{
-    AccountId, BabeConfig, Balance, BalancesConfig, RuntimeGenesisConfig, SessionConfig,
-    SessionKeys, StakingConfig, SudoConfig, BABE_GENESIS_EPOCH_CONFIG,
+    configs::MaxActiveValidators, AccountId, BabeConfig, Balance, BalancesConfig,
+    RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, SudoConfig,
+    BABE_GENESIS_EPOCH_CONFIG,
 };
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
@@ -37,7 +38,7 @@ fn testnet_genesis(
                 .collect(),
         },
         staking: StakingConfig {
-            validator_count,
+            validator_count: MaxActiveValidators::get(),
             minimum_validator_count: validator_count,
             invulnerables: endowed_accounts,
             stakers
