@@ -142,7 +142,7 @@ pub fn new_partial(
         config.prometheus_registry(),
         &task_manager.spawn_handle(),
     )
-    .map_err(|e| ServiceError::Other(format!("Statement store error: {:?}", e)))?;
+    .map_err(|e| ServiceError::Other(format!("Statement store error: {e:?}")))?;
 
     let import_setup = (babe_block_import, grandpa_link, babe_link.clone());
     let (rpc_extensions_builder, rpc_setup) = {
@@ -295,10 +295,9 @@ pub fn new_full<
         tx_handler_controller,
         sync_service: sync_service.clone(),
         telemetry: telemetry.as_mut(),
-    })
-    .unwrap();
+    })?;
 
-    if let sc_service::config::Role::Authority { .. } = &role {
+    if let sc_service::config::Role::Authority = &role {
         let proposer = sc_basic_authorship::ProposerFactory::new(
             task_manager.spawn_handle(),
             client.clone(),

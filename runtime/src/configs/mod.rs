@@ -54,7 +54,7 @@ use pallet_election_provider_multi_phase::GeometricDepositBase;
 use pallet_staking::UseValidatorsMap;
 use pallet_transaction_payment::{ConstFeeMultiplier, FungibleAdapter, Multiplier};
 use sp_runtime::{
-    generic, traits,
+    traits,
     traits::{Keccak256, One, OpaqueKeys},
     transaction_validity::TransactionPriority,
     FixedPointNumber, FixedU128, Perbill, Percent, SaturatedConversion,
@@ -111,7 +111,7 @@ impl frame_system::Config for Runtime {
 parameter_types! {
     pub const EpochDuration: u64 = prod_or_fast!(
         EPOCH_DURATION_IN_SLOTS as u64,
-        2 * MINUTES as u64
+        1 * MINUTES as u64
     );
     pub const ExpectedBlockTime: Moment = MILLI_SECS_PER_BLOCK;
     pub const ReportLongevity: u64 =
@@ -305,7 +305,7 @@ where
     type Extension = TxExtension;
 
     fn create_transaction(call: RuntimeCall, extension: TxExtension) -> UncheckedExtrinsic {
-        generic::UncheckedExtrinsic::new_transaction(call, extension).into()
+        UncheckedExtrinsic::new_transaction(call, extension)
     }
 }
 impl frame_system::offchain::SigningTypes for Runtime {

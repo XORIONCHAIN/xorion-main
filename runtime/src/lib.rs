@@ -1,4 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::identity_op)]
 
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
@@ -59,6 +60,7 @@ impl_opaque_keys! {
     pub struct SessionKeys {
         pub babe: Babe,
         pub grandpa: Grandpa,
+        pub authority_discovery: AuthorityDiscovery,
     }
 }
 

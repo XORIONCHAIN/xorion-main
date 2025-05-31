@@ -6,11 +6,11 @@
 /// Usage:
 /// ```Rust
 /// parameter_types! {
-/// 	// Note that the env variable version parameter cannot be const.
-/// 	pub LaunchPeriod: BlockNumber = prod_or_fast!(7 * DAYS, 1, "XORION_LAUNCH_PERIOD");
-/// 	pub const VotingPeriod: BlockNumber = prod_or_fast!(7 * DAYS, 1 * MINUTES);
-/// 	pub const EpochDuration: BlockNumber =
-/// 		prod_or_fast!(1 * HOURS, "fast-runtime", 1 * MINUTES, "fast-runtime-10m", 10 * MINUTES);
+///     // Note that the env variable version parameter cannot be const.
+///     pub LaunchPeriod: BlockNumber = prod_or_fast!(7 * DAYS, 1, "XORION_LAUNCH_PERIOD");
+///     pub const VotingPeriod: BlockNumber = prod_or_fast!(7 * DAYS, 1 * MINUTES);
+///     pub const EpochDuration: BlockNumber =
+///          prod_or_fast!(1 * HOURS, "fast-runtime", 1 * MINUTES, "fast-runtime-10m", 10 * MINUTES);
 /// }
 /// ```
 #[macro_export]
