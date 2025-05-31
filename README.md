@@ -62,7 +62,7 @@ The following command starts a single-node development chain that doesn't
 persist state:
 
 ```sh
-./target/release/solochain-template-node --dev
+./target/debug/solochain-template-node --dev
 ```
 
 To purge the development chain's state, run the following command:
