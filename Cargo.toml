@@ -10,6 +10,7 @@ members = [
     "node",
     "pallets/template",
     "runtime",
+    "xor-account",
 ]
 resolver = "2"
 
@@ -102,6 +103,9 @@ sp-version = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = 
 substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 substrate-state-trie-migration-rpc = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 
+log = "0.4.27"
+
+xor-account = { path = "xor-account", default-features = false }
 [profile.release]
 opt-level = 3
 panic = "unwind"

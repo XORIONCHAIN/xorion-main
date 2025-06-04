@@ -8,7 +8,7 @@ use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use solochain_template_runtime::{Block, EXISTENTIAL_DEPOSIT};
-use sp_keyring::Sr25519Keyring;
+use xor_account::dev_accounts::DevAccounts;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
@@ -159,7 +159,7 @@ pub fn run() -> sc_cli::Result<()> {
                             Box::new(RemarkBuilder::new(client.clone())),
                             Box::new(TransferKeepAliveBuilder::new(
                                 client.clone(),
-                                Sr25519Keyring::Alice.to_account_id(),
+                                DevAccounts::Alice.to_account_id(),
                                 EXISTENTIAL_DEPOSIT,
                             )),
                         ]);

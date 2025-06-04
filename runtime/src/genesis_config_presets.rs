@@ -9,10 +9,10 @@ use serde_json::Value;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
-use sp_core::{crypto::get_public_from_string_or_panic, sr25519};
+use sp_core::crypto::get_public_from_string_or_panic;
 use sp_genesis_builder::{self, PresetId};
-use sp_keyring::Sr25519Keyring;
 use sp_staking::StakerStatus;
+use xor_account::dev_accounts::DevAccounts;
 
 // Returns the genesis config presets populated with given parameters.
 fn testnet_genesis(
@@ -32,10 +32,7 @@ fn testnet_genesis(
                 .collect::<Vec<_>>(),
         },
         session: SessionConfig {
-            keys: initial_authorities
-                .iter()
-                .map(|x| { (x.0.clone(), x.1.clone(), x.2.clone()) })
-                .collect(),
+            keys: initial_authorities.iter().map(|x| { (x.0, x.1, x.2.clone()) }).collect(),
         },
         staking: StakingConfig {
             validator_count: MaxActiveValidators::get(),
@@ -53,15 +50,15 @@ pub fn development_config_genesis() -> Value {
     let (alice_stash, _alice, alice_session_keys) = authority_keys_from_seed("Alice");
 
     testnet_genesis(
-        vec![(alice_stash.clone(), alice_stash.clone(), alice_session_keys)],
+        vec![(alice_stash, alice_stash, alice_session_keys)],
         vec![
-            Sr25519Keyring::Alice.to_account_id(),
-            Sr25519Keyring::Bob.to_account_id(),
-            Sr25519Keyring::AliceStash.to_account_id(),
-            Sr25519Keyring::BobStash.to_account_id(),
+            DevAccounts::Alice.to_account_id(),
+            DevAccounts::Bob.to_account_id(),
+            DevAccounts::AliceStash.to_account_id(),
+            DevAccounts::BobStash.to_account_id(),
         ],
-        sp_keyring::Sr25519Keyring::Alice.to_account_id(),
-        vec![validator(alice_stash.clone())],
+        DevAccounts::Alice.to_account_id(),
+        vec![validator(alice_stash)],
     )
 }
 
@@ -71,15 +68,12 @@ pub fn local_config_genesis() -> Value {
     let (bob_stash, _bob, bob_session_keys) = authority_keys_from_seed("Bob");
     testnet_genesis(
         vec![
-            (alice_stash.clone(), alice_stash.clone(), alice_session_keys),
-            (bob_stash.clone(), bob_stash.clone(), bob_session_keys),
+            (alice_stash, alice_stash, alice_session_keys),
+            (bob_stash, bob_stash, bob_session_keys),
         ],
-        Sr25519Keyring::iter()
-            .filter(|v| v != &Sr25519Keyring::One && v != &Sr25519Keyring::Two)
-            .map(|v| v.to_account_id())
-            .collect::<Vec<_>>(),
-        Sr25519Keyring::Alice.to_account_id(),
-        vec![validator(alice_stash.clone())],
+        DevAccounts::all().into_iter().map(|x| x.to_account_id()).collect(),
+        DevAccounts::Alice.to_account_id(),
+        vec![validator(alice_stash)],
     )
 }
 
@@ -112,7 +106,7 @@ pub type Staker = (AccountId, AccountId, Balance, StakerStatus<AccountId>);
 /// staking config.
 pub fn validator(account: AccountId) -> Staker {
     // validator, controller, stash, staker status
-    (account.clone(), account, 1u128 << 50, StakerStatus::Validator)
+    (account, account, 1u128 << 50, StakerStatus::Validator)
 }
 
 pub fn session_keys(
@@ -136,8 +130,8 @@ pub fn session_keys_from_seed(seed: &str) -> SessionKeys {
 /// Note: `//` is prepended internally.
 pub fn authority_keys_from_seed(seed: &str) -> (AccountId, AccountId, SessionKeys) {
     (
-        get_public_from_string_or_panic::<sr25519::Public>(&alloc::format!("{seed}//stash")).into(),
-        get_public_from_string_or_panic::<sr25519::Public>(seed).into(),
+        AccountId::from_seed(&alloc::format!("{seed}//stash")),
+        AccountId::from_seed(seed),
         session_keys_from_seed(seed),
     )
 }

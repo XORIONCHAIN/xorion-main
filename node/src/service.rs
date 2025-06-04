@@ -8,14 +8,12 @@ use sc_consensus_grandpa::SharedVoterState;
 use sc_network::Event;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager, WarpSyncConfig};
-use sc_statement_store::Store as StatementStore;
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use solochain_template_runtime::{self, apis::RuntimeApi, opaque::Block};
 use std::{sync::Arc, time::Duration};
 
-type HostFunctions =
-    (sp_io::SubstrateHostFunctions, sp_statement_store::runtime_api::HostFunctions);
+type HostFunctions = sp_io::SubstrateHostFunctions;
 
 pub(crate) type FullClient =
     sc_service::TFullClient<Block, RuntimeApi, sc_executor::WasmExecutor<HostFunctions>>;
@@ -53,7 +51,6 @@ pub fn new_partial(
             ),
             SharedVoterState,
             Option<Telemetry>,
-            Arc<StatementStore>,
         ),
     >,
     ServiceError,
@@ -134,16 +131,6 @@ pub fn new_partial(
         },
     )?;
 
-    let statement_store = sc_statement_store::Store::new_shared(
-        &config.data_path,
-        Default::default(),
-        client.clone(),
-        keystore_container.local_keystore(),
-        config.prometheus_registry(),
-        &task_manager.spawn_handle(),
-    )
-    .map_err(|e| ServiceError::Other(format!("Statement store error: {e:?}")))?;
-
     let import_setup = (babe_block_import, grandpa_link, babe_link.clone());
     let (rpc_extensions_builder, rpc_setup) = {
         let grandpa_link = &import_setup.1;
@@ -164,7 +151,6 @@ pub fn new_partial(
         let chain_spec = config.chain_spec.cloned_box();
 
         let rpc_backend = backend.clone();
-        let rpc_statement_store = statement_store.clone();
         let rpc_extensions_builder = move |subscription_executor: SubscriptionTaskExecutor| {
             let deps = FullDeps {
                 client: client.clone(),
@@ -182,7 +168,6 @@ pub fn new_partial(
                     subscription_executor: subscription_executor.clone(),
                     finality_provider: finality_proof_provider.clone(),
                 },
-                statement_store: rpc_statement_store.clone(),
                 backend: rpc_backend.clone(),
             };
             create_full(deps).map_err(Into::into)
@@ -199,7 +184,7 @@ pub fn new_partial(
         keystore_container,
         select_chain,
         transaction_pool,
-        other: (rpc_extensions_builder, import_setup, rpc_setup, telemetry, statement_store),
+        other: (rpc_extensions_builder, import_setup, rpc_setup, telemetry),
     })
 }
 
@@ -217,7 +202,7 @@ pub fn new_full<
         keystore_container,
         select_chain,
         transaction_pool,
-        other: (rpc_builder, import_setup, rpc_setup, mut telemetry, statement_store),
+        other: (rpc_builder, import_setup, rpc_setup, mut telemetry),
     } = new_partial(&config)?;
 
     let mut net_config = sc_network::config::FullNetworkConfiguration::<
@@ -226,7 +211,6 @@ pub fn new_full<
         N,
     >::new(&config.network, config.prometheus_registry().cloned());
     let metrics = N::register_notification_metrics(config.prometheus_registry());
-    let genesis_hash = client.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
     let enable_offchain_worker = config.offchain_worker.enabled;
     let auth_disc_publish_non_global_ips = config.network.allow_non_globals_in_dht;
     let auth_disc_public_addresses = config.network.public_addresses.clone();
@@ -243,16 +227,6 @@ pub fn new_full<
             Arc::clone(&peer_store_handle),
         );
     net_config.add_notification_protocol(grandpa_protocol_config);
-    let (statement_handler_proto, statement_config) =
-        sc_network_statement::StatementHandlerPrototype::new::<_, _, N>(
-            genesis_hash,
-            config.chain_spec.fork_id(),
-            metrics.clone(),
-            Arc::clone(&peer_store_handle),
-        );
-
-    net_config.add_notification_protocol(statement_config);
-
     let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
         backend.clone(),
         import_setup.1.shared_authority_set().clone(),
@@ -428,25 +402,6 @@ pub fn new_full<
             sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
         );
     }
-    // Spawn statement protocol worker
-    let statement_protocol_executor = {
-        let spawn_handle = task_manager.spawn_handle();
-        Box::new(move |fut| {
-            spawn_handle.spawn("network-statement-validator", Some("networking"), fut);
-        })
-    };
-    let statement_handler = statement_handler_proto.build(
-        network.clone(),
-        sync_service.clone(),
-        statement_store.clone(),
-        prometheus_registry.as_ref(),
-        statement_protocol_executor,
-    )?;
-    task_manager.spawn_handle().spawn(
-        "network-statement-handler",
-        Some("networking"),
-        statement_handler.run(),
-    );
 
     if enable_offchain_worker {
         let offchain_workers =
@@ -458,9 +413,7 @@ pub fn new_full<
                 network_provider: Arc::new(network.clone()),
                 is_validator: role.is_authority(),
                 enable_http_requests: true,
-                custom_extensions: move |_| {
-                    vec![Box::new(statement_store.clone().as_statement_store_ext()) as Box<_>]
-                },
+                custom_extensions: move |_| vec![],
             })?;
         task_manager.spawn_handle().spawn(
             "offchain-workers-runner",

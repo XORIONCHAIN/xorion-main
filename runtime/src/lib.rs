@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::identity_op)]
 
+extern crate alloc;
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
@@ -9,13 +10,11 @@ pub mod apis;
 mod benchmarks;
 pub mod configs;
 
-extern crate alloc;
 use alloc::vec::Vec;
 use scale_info::prelude::vec;
 use sp_runtime::{
     generic, impl_opaque_keys,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiAddress, MultiSignature,
 };
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -110,6 +109,7 @@ mod block_times {
 }
 use crate::{configs::MaxElectingVoters, governance::pallet_custom_origins};
 pub use block_times::*;
+use xor_account::Signature;
 
 // Time is measured by number of blocks.
 pub const MINUTES: BlockNumber = 60_000 / (MILLI_SECS_PER_BLOCK as BlockNumber);
@@ -135,9 +135,6 @@ pub fn native_version() -> NativeVersion {
     NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
-
 /// Some way of identifying an account on the chain. We intentionally make it equivalent
 /// to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
@@ -155,7 +152,7 @@ pub type Hash = sp_core::H256;
 pub type BlockNumber = u32;
 
 /// The address format for describing accounts.
-pub type Address = MultiAddress<AccountId, ()>;
+pub type Address = AccountId;
 
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
@@ -294,7 +291,4 @@ mod runtime {
 
     #[runtime::pallet_index(18)]
     pub type Mmr = pallet_mmr::Pallet<Runtime>;
-
-    #[runtime::pallet_index(19)]
-    pub type Statement = pallet_statement::Pallet<Runtime>;
 }

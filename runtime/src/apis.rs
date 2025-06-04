@@ -23,6 +23,12 @@
 //
 // For more information, please refer to <http://unlicense.org>
 
+// Local module imports
+use super::{
+    AccountId, AuthorityDiscovery, Babe, Balance, Block, BlockNumber, Executive, Grandpa,
+    Historical, InherentDataExt, Mmr, Nonce, Runtime, RuntimeCall, RuntimeGenesisConfig,
+    SessionKeys, System, TransactionPayment, BABE_GENESIS_EPOCH_CONFIG, VERSION,
+};
 // External crates imports
 use crate::configs::{mmr, EpochDuration};
 use alloc::vec::Vec;
@@ -40,12 +46,6 @@ use sp_runtime::{
     ApplyExtrinsicResult,
 };
 use sp_version::RuntimeVersion;
-// Local module imports
-use super::{
-    AccountId, AuthorityDiscovery, Babe, Balance, Block, BlockNumber, Executive, Grandpa,
-    Historical, InherentDataExt, Mmr, Nonce, Runtime, RuntimeCall, RuntimeGenesisConfig,
-    SessionKeys, Statement, System, TransactionPayment, BABE_GENESIS_EPOCH_CONFIG, VERSION,
-};
 
 impl_runtime_apis! {
     impl sp_api::Core<Block> for Runtime {
@@ -234,15 +234,6 @@ impl_runtime_apis! {
         }
         fn query_length_to_fee(length: u32) -> Balance {
             TransactionPayment::length_to_fee(length)
-        }
-    }
-
-    impl sp_statement_store::runtime_api::ValidateStatement<Block> for Runtime {
-        fn validate_statement(
-            source: sp_statement_store::runtime_api::StatementSource,
-            statement: sp_statement_store::Statement,
-        ) -> Result<sp_statement_store::runtime_api::ValidStatement, sp_statement_store::runtime_api::InvalidStatement> {
-            Statement::validate_statement(source, statement)
         }
     }
 

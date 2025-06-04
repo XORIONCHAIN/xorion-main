@@ -23,8 +23,11 @@
 //
 // For more information, please refer to <http://unlicense.org>
 
-use frame_election_provider_support::{
-    bounds::ElectionBoundsBuilder, onchain, Get, SequentialPhragmen,
+// Local module imports
+use super::{
+    AccountId, Balance, Balances, Block, BlockNumber, Hash, Nonce, PalletInfo, Runtime,
+    RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
+    System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION,
 };
 // Substrate and Polkadot dependencies
 use crate::{
@@ -33,7 +36,10 @@ use crate::{
     prod_or_fast, Babe, DelegatedStaking, ElectionProviderMultiPhase, Historical, Moment,
     NominationPools, NposCompactSolution16, Offences, OnChainAccuracy, Session, SessionKeys,
     Signature, Staking, Timestamp, TransactionPayment, TxExtension, UncheckedExtrinsic, VoterList,
-    CENTS, EPOCH_DURATION_IN_SLOTS, MILLI_SECS_PER_BLOCK, MILLI_UNIT, MINUTES, UNIT,
+    EPOCH_DURATION_IN_SLOTS, MILLI_SECS_PER_BLOCK, MINUTES, UNIT,
+};
+use frame_election_provider_support::{
+    bounds::ElectionBoundsBuilder, onchain, Get, SequentialPhragmen,
 };
 use frame_support::{
     derive_impl,
@@ -55,18 +61,12 @@ use pallet_staking::UseValidatorsMap;
 use pallet_transaction_payment::{ConstFeeMultiplier, FungibleAdapter, Multiplier};
 use sp_runtime::{
     traits,
-    traits::{Keccak256, One, OpaqueKeys},
+    traits::{IdentityLookup, Keccak256, One, OpaqueKeys},
     transaction_validity::TransactionPriority,
     FixedPointNumber, FixedU128, Perbill, Percent, SaturatedConversion,
 };
 use sp_staking::{EraIndex, SessionIndex};
 use sp_version::RuntimeVersion;
-// Local module imports
-use super::{
-    AccountId, Balance, Balances, Block, BlockNumber, Hash, Nonce, PalletInfo, Runtime,
-    RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
-    System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION,
-};
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
@@ -106,6 +106,9 @@ impl frame_system::Config for Runtime {
     /// This is used as an identifier of the chain. 42 is the generic substrate prefix.
     type SS58Prefix = SS58Prefix;
     type MaxConsumers = frame_support::traits::ConstU32<16>;
+
+    /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
+    type Lookup = IdentityLookup<AccountId>;
 }
 
 parameter_types! {
@@ -606,26 +609,6 @@ impl pallet_mmr::Config for Runtime {
     type WeightInfo = ();
     #[cfg(feature = "runtime-benchmarks")]
     type BenchmarkHelper = ();
-}
-
-parameter_types! {
-    pub StatementCost: Balance = 100 * CENTS;
-    pub StatementByteCost: Balance = 100 * MILLI_UNIT;
-    pub const MinAllowedStatements: u32 = 4;
-    pub const MaxAllowedStatements: u32 = 10;
-    pub const MinAllowedBytes: u32 = 1024;
-    pub const MaxAllowedBytes: u32 = 4096;
-}
-
-impl pallet_statement::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type Currency = Balances;
-    type StatementCost = StatementCost;
-    type ByteCost = StatementByteCost;
-    type MinAllowedStatements = MinAllowedStatements;
-    type MaxAllowedStatements = MaxAllowedStatements;
-    type MinAllowedBytes = MinAllowedBytes;
-    type MaxAllowedBytes = MaxAllowedBytes;
 }
 
 impl pallet_authority_discovery::Config for Runtime {
