@@ -123,7 +123,7 @@ pub const UNIT: Balance = 1_000_000_000_000;
 pub const MILLI_UNIT: Balance = 1_000_000_000;
 pub const MICRO_UNIT: Balance = 1_000_000;
 pub const CENTS: Balance = 1_000 * MILLI_UNIT;
-pub const GRAND: Balance = CENTS * 100_000;
+pub const GRAND: Balance = CENTS * 100_000; // 1K
 
 /// Existential deposit.
 pub const EXISTENTIAL_DEPOSIT: Balance = MILLI_UNIT;
