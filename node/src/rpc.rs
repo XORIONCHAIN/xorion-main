@@ -15,7 +15,6 @@ use sc_consensus_grandpa::{
 };
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_transaction_pool_api::TransactionPool;
-use solochain_template_runtime::{opaque::Block, AccountId, Balance, BlockNumber, Hash, Nonce};
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
@@ -23,6 +22,7 @@ use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 use sp_keystore::KeystorePtr;
 use substrate_state_trie_migration_rpc::{StateMigration, StateMigrationApiServer};
+use xorion_runtime::{opaque::Block, AccountId, Balance, BlockNumber, Hash, Nonce};
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {

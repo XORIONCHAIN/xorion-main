@@ -6,10 +6,10 @@ use crate::service::FullClient;
 
 use runtime::{AccountId, Balance, BalancesCall, SystemCall};
 use sc_cli::Result;
-use solochain_template_runtime as runtime;
 use sp_inherents::{InherentData, InherentDataProvider};
 use sp_keyring::Sr25519Keyring;
 use sp_runtime::OpaqueExtrinsic;
+use xorion_runtime as runtime;
 
 use std::{sync::Arc, time::Duration};
 
