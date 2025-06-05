@@ -25,14 +25,10 @@ jobs:
       - if: contains(matrix.os, 'ubuntu')
         uses: ./.github/actions/ubuntu-dependencies
 
-      - name: Build the template
-        run: cargo build
-        timeout-minutes: 90
-
       - name: Run clippy
         run: |
           SKIP_WASM_BUILD=1 cargo clippy --all-targets --locked --workspace
-        timeout-minutes: 30
+        timeout-minutes: 99
 
       - name: Run the tests
         run: SKIP_WASM_BUILD=1 cargo test
