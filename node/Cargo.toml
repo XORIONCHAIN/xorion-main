@@ -1,5 +1,5 @@
 [package]
-name = "solochain-template-node"
+name = "xorion-node"
 description = "A solochain node template built with Substrate, part of Polkadot Sdk."
 version = "0.1.0"
 license = "Unlicense"
@@ -64,7 +64,7 @@ sc-transaction-pool-api.default-features = true
 sc-transaction-pool-api.workspace = true
 sc-transaction-pool.default-features = true
 sc-transaction-pool.workspace = true
-solochain-template-runtime.workspace = true
+xorion-runtime.workspace = true
 sp-api.default-features = true
 sp-api.workspace = true
 sp-block-builder.default-features = true
@@ -103,14 +103,14 @@ substrate-build-script-utils.workspace = true
 
 [features]
 default = ["std"]
-std = ["solochain-template-runtime/std"]
+std = ["xorion-runtime/std"]
 # Dependencies that are only required if runtime benchmarking should be build.
 runtime-benchmarks = [
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"pallet-transaction-payment/runtime-benchmarks",
 	"sc-service/runtime-benchmarks",
-	"solochain-template-runtime/runtime-benchmarks",
+	"xorion-runtime/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 ]
 # Enable features that allow the runtime to be tried and debugged. Name might be subject to change
@@ -118,6 +118,6 @@ runtime-benchmarks = [
 try-runtime = [
 	"frame-system/try-runtime",
 	"pallet-transaction-payment/try-runtime",
-	"solochain-template-runtime/try-runtime",
+	"xorion-runtime/try-runtime",
 	"sp-runtime/try-runtime",
 ]

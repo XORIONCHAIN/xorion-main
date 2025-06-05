@@ -1,7 +1,7 @@
 use sc_chain_spec::{ChainSpecExtension, Properties};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use solochain_template_runtime::{Block, WASM_BINARY};
+use xorion_runtime::{Block, WASM_BINARY};
 
 /// Node `ChainSpec` extensions.
 ///
