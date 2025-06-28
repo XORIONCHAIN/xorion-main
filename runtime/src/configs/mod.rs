@@ -36,7 +36,7 @@ use crate::{
     prod_or_fast, Babe, DelegatedStaking, ElectionProviderMultiPhase, Historical, Moment,
     NominationPools, NposCompactSolution16, Offences, OnChainAccuracy, Session, SessionKeys,
     Signature, Staking, Timestamp, TransactionPayment, TxExtension, UncheckedExtrinsic, VoterList,
-    EPOCH_DURATION_IN_SLOTS, MILLI_SECS_PER_BLOCK, MINUTES, UNIT,
+    CENTS, EPOCH_DURATION_IN_SLOTS, MILLI_SECS_PER_BLOCK, MINUTES,
 };
 use frame_election_provider_support::{
     bounds::ElectionBoundsBuilder, onchain, Get, SequentialPhragmen,
@@ -212,8 +212,8 @@ parameter_types! {
     pub const SignedFixedDeposit: Balance = deposit(2, 0);
     pub const SignedDepositIncreaseFactor: Percent = Percent::from_percent(10);
     pub const SignedDepositByte: Balance = deposit(0, 10) / 1024;
-    // Each good submission will get 1 WND as reward
-    pub SignedRewardBase: Balance = 1 * UNIT;
+    // Each good submission will get 0.01 XOR as reward
+    pub SignedRewardBase: Balance = 1 * CENTS;
 
     // 1 hour session, 15 minutes unsigned phase, 4 offchain executions.
     pub OffchainRepeat: BlockNumber = UnsignedPhase::get() / 4;
