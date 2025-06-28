@@ -24,7 +24,7 @@ pub type ChainSpec = sc_service::GenericChainSpec<Extensions>;
 pub fn properties() -> Properties {
     let mut properties = Properties::new();
     properties.insert("tokenSymbol".into(), "XOR".into());
-    properties.insert("tokenDecimals".into(), 14.into());
+    properties.insert("tokenDecimals".into(), 18.into());
     properties
 }
 pub fn development_chain_spec() -> Result<ChainSpec, String> {

@@ -10,7 +10,6 @@ members = [
     "node",
     "pallets/template",
     "runtime",
-    "xor-account",
 ]
 resolver = "2"
 
@@ -105,7 +104,6 @@ substrate-state-trie-migration-rpc = { git = "https://github.com/paritytech/polk
 
 log = "0.4.27"
 
-xor-account = { path = "xor-account", default-features = false }
 [profile.release]
 opt-level = 3
 panic = "unwind"

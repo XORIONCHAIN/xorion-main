@@ -15,6 +15,7 @@ use scale_info::prelude::vec;
 use sp_runtime::{
     generic, impl_opaque_keys,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
+    MultiSignature,
 };
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -109,7 +110,9 @@ mod block_times {
 }
 use crate::{configs::MaxElectingVoters, governance::pallet_custom_origins};
 pub use block_times::*;
-use xor_account::Signature;
+
+/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
+pub type Signature = MultiSignature;
 
 // Time is measured by number of blocks.
 pub const MINUTES: BlockNumber = 60_000 / (MILLI_SECS_PER_BLOCK as BlockNumber);
@@ -119,10 +122,9 @@ pub const DAYS: BlockNumber = HOURS * 24;
 pub const BLOCK_HASH_COUNT: BlockNumber = 2400;
 
 // Unit = the base number of indivisible units for balances
-pub const UNIT: Balance = 1_000_000_000_000;
-pub const MILLI_UNIT: Balance = 1_000_000_000;
-pub const MICRO_UNIT: Balance = 1_000_000;
 pub const CENTS: Balance = 1_000 * MILLI_UNIT;
+pub const MILLI_UNIT: Balance = 1_000 * MICRO_UNIT;
+pub const MICRO_UNIT: Balance = 10_000_000_000;
 pub const GRAND: Balance = CENTS * 100_000; // 1K
 
 /// Existential deposit.
