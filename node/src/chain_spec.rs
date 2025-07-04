@@ -1,7 +1,7 @@
 use sc_chain_spec::{ChainSpecExtension, Properties};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use xorion_runtime::{Block, WASM_BINARY};
+use xorion_runtime::{genesis_config_presets::TEST_NET, Block, WASM_BINARY};
 
 /// Node `ChainSpec` extensions.
 ///
@@ -50,5 +50,18 @@ pub fn local_chain_spec() -> Result<ChainSpec, String> {
     .with_chain_type(ChainType::Local)
     .with_properties(properties())
     .with_genesis_config_preset_name(sp_genesis_builder::LOCAL_TESTNET_RUNTIME_PRESET)
+    .build())
+}
+
+pub fn test_net_chain_spec() -> Result<ChainSpec, String> {
+    Ok(ChainSpec::builder(
+        WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?,
+        Default::default(),
+    )
+    .with_name("Main Testnet")
+    .with_id("testnet")
+    .with_chain_type(ChainType::Live)
+    .with_properties(properties())
+    .with_genesis_config_preset_name(TEST_NET)
     .build())
 }
