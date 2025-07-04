@@ -9,7 +9,10 @@ use serde_json::Value;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
-use sp_core::{crypto::get_public_from_string_or_panic, sr25519};
+use sp_core::{
+    crypto::{get_public_from_string_or_panic, Ss58Codec},
+    sr25519,
+};
 use sp_genesis_builder::{self, PresetId};
 use sp_keyring::Sr25519Keyring;
 use sp_staking::StakerStatus;
@@ -73,11 +76,37 @@ pub fn local_config_genesis() -> Value {
     )
 }
 
+pub fn test_net_config_genesis() -> Value {
+    let (account, stash, session_keys) = (
+        AccountId::from_ss58check("5CmEbGjVRTNB6CaN2vgEyhtUZ2bfyXtaUoYfjwe8h6RzbrUB").unwrap(),
+        AccountId::from_ss58check("5Epmb86Zpkx3V366R5dfH57vA5o4g1ehfEmdRHEFnxJFm3nG").unwrap(),
+        SessionKeys {
+            babe: BabeId::from_ss58check("5CzFDWtNknPfgMdWnvVK9JyWqXJM2kyHzuB7EGwSaAssEYVX")
+                .unwrap(),
+            grandpa: GrandpaId::from_ss58check("5DHAVCuwaVqhF2nVXXMJHNkRySpaSLxutGhytJv65xPgvBhM")
+                .unwrap(),
+            authority_discovery: AuthorityDiscoveryId::from_ss58check(
+                "5GHB9FMturXHnkMwUCjGcuALC1V3MePix4BoJ7GwGajR5UEU",
+            )
+            .unwrap(),
+        },
+    );
+    testnet_genesis(
+        vec![(account.clone(), stash.clone(), session_keys)],
+        vec![account.clone(), stash.clone()],
+        account,
+        vec![validator(stash)],
+    )
+}
+
+pub const TEST_NET: &'static str = "testnet";
+
 /// Provides the JSON representation of predefined genesis config for given `id`.
 pub fn get_preset(id: &PresetId) -> Option<Vec<u8>> {
     let patch = match id.as_ref() {
         sp_genesis_builder::DEV_RUNTIME_PRESET => development_config_genesis(),
         sp_genesis_builder::LOCAL_TESTNET_RUNTIME_PRESET => local_config_genesis(),
+        TEST_NET => test_net_config_genesis(),
         _ => return None,
     };
     Some(
@@ -92,6 +121,7 @@ pub fn preset_names() -> Vec<PresetId> {
     vec![
         PresetId::from(sp_genesis_builder::DEV_RUNTIME_PRESET),
         PresetId::from(sp_genesis_builder::LOCAL_TESTNET_RUNTIME_PRESET),
+        PresetId::from(TEST_NET),
     ]
 }
 
