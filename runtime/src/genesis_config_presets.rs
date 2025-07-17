@@ -103,7 +103,7 @@ pub fn test_net_config_genesis() -> Value {
     )
 }
 
-pub const TEST_NET: &'static str = "testnet";
+pub const TEST_NET: &str = "testnet";
 
 /// Provides the JSON representation of predefined genesis config for given `id`.
 pub fn get_preset(id: &PresetId) -> Option<Vec<u8>> {
