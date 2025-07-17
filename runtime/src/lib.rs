@@ -108,7 +108,10 @@ mod block_times {
     pub const SLOT_DURATION: u64 = MILLI_SECS_PER_BLOCK;
     pub const EPOCH_DURATION_IN_SLOTS: BlockNumber = prod_or_fast!(1 * HOURS, 1 * MINUTES);
 }
-use crate::{configs::MaxElectingVoters, governance::pallet_custom_origins};
+use crate::{
+    configs::{check_nonce::CheckNonce, MaxElectingVoters},
+    governance::pallet_custom_origins,
+};
 pub use block_times::*;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
@@ -192,7 +195,7 @@ pub type TxExtension = (
     frame_system::CheckTxVersion<Runtime>,
     frame_system::CheckGenesis<Runtime>,
     frame_system::CheckEra<Runtime>,
-    frame_system::CheckNonce<Runtime>,
+    CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
     frame_metadata_hash_extension::CheckMetadataHash<Runtime>,

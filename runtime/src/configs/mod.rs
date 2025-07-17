@@ -23,6 +23,8 @@
 //
 // For more information, please refer to <http://unlicense.org>
 
+pub mod check_nonce;
+
 // Local module imports
 use super::{
     AccountId, Balance, Balances, Block, BlockNumber, Hash, Nonce, PalletInfo, Runtime,
