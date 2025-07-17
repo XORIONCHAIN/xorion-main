@@ -1,6 +1,6 @@
 [package]
 name = "xorion-runtime"
-description = "A solochain runtime template built with Substrate, part of Polkadot Sdk."
+description = "Xorion runtime built with Substrate, part of Xorion Sdk."
 version = "0.1.0"
 license = "Unlicense"
 authors.workspace = true
@@ -33,7 +33,7 @@ pallet-offences.workspace = true
 pallet-balances.workspace = true
 pallet-grandpa.workspace = true
 pallet-sudo.workspace = true
-pallet-template.workspace = true
+pallet-airdrop.workspace = true
 pallet-mmr.workspace = true
 pallet-statement.workspace = true
 pallet-timestamp.workspace = true
@@ -90,7 +90,7 @@ std = [
 	"pallet-balances/std",
 	"pallet-grandpa/std",
 	"pallet-sudo/std",
-	"pallet-template/std",
+    "pallet-airdrop/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
@@ -129,7 +129,7 @@ runtime-benchmarks = [
 	"pallet-balances/runtime-benchmarks",
 	"pallet-grandpa/runtime-benchmarks",
 	"pallet-sudo/runtime-benchmarks",
-	"pallet-template/runtime-benchmarks",
+    "pallet-airdrop/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"pallet-transaction-payment/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
@@ -148,7 +148,7 @@ try-runtime = [
 	"pallet-balances/try-runtime",
 	"pallet-grandpa/try-runtime",
 	"pallet-sudo/try-runtime",
-	"pallet-template/try-runtime",
+    "pallet-airdrop/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
 	"sp-runtime/try-runtime",

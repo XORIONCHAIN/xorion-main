@@ -8,14 +8,14 @@ edition = "2021"
 [workspace]
 members = [
     "node",
-    "pallets/template",
+    "pallets/airdrop",
     "runtime",
 ]
 resolver = "2"
 
 [workspace.dependencies]
 xorion-runtime = { path = "./runtime", default-features = false }
-pallet-template = { path = "./pallets/template", default-features = false }
+pallet-airdrop = { path = "./pallets/airdrop", default-features = false }
 clap = { version = "4.5.13" }
 serde = "1.0.219"
 frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }

@@ -1,5 +1,5 @@
 use crate::{
-    configs::MaxActiveValidators, AccountId, BabeConfig, Balance, BalancesConfig,
+    configs::MaxActiveValidators, AccountId, AirdropConfig, BabeConfig, Balance, BalancesConfig,
     RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, SudoConfig,
     BABE_GENESIS_EPOCH_CONFIG,
 };
@@ -32,11 +32,15 @@ fn testnet_genesis(
             balances: endowed_accounts
                 .iter()
                 .cloned()
-                .map(|k| (k, 1u128 << 120))
+                .map(|k| (k, 1u128 << 70))
                 .collect::<Vec<_>>(),
         },
         session: SessionConfig {
             keys: initial_authorities.into_iter().map(|x| { (x.0, x.1, x.2.clone()) }).collect(),
+        },
+        airdrop: AirdropConfig {
+            initial_funding: 1u128 << 80,
+            pre_funded_accounts: Default::default()
         },
         staking: StakingConfig {
             validator_count: MaxActiveValidators::get(),

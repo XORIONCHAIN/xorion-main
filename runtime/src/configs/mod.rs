@@ -27,7 +27,7 @@
 use super::{
     AccountId, Balance, Balances, Block, BlockNumber, Hash, Nonce, PalletInfo, Runtime,
     RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
-    System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION,
+    System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, UNIT, VERSION,
 };
 // Substrate and Polkadot dependencies
 use crate::{
@@ -584,6 +584,42 @@ impl pallet_transaction_payment::Config for Runtime {
     type FeeMultiplierUpdate = ConstFeeMultiplier<FeeMultiplier>;
     type OperationalFeeMultiplier = ConstU8<5>;
     type WeightInfo = pallet_transaction_payment::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+    /// The PalletId for the airdrop pallet, used to derive the sovereign account
+    pub const AirdropPalletId: PalletId = PalletId(*b"py/airdr");
+
+    /// The amount of tokens to airdrop per claim
+    /// 1000 xor tokens
+    pub const AirdropAmount: Balance = 1000 * UNIT;
+
+    /// Minimum balance threshold to be considered "unfunded"
+    /// Users with balance below this can claim airdrops
+    pub const MinimumBalanceThreshold: Balance = 100 * UNIT;
+
+    /// Maximum number of airdrops allowed per block
+    /// Prevents spam and controls distribution rate
+    pub const MaxAirdropsPerBlock: u32 = 100;
+
+    /// Cooldown period between airdrops for the same account
+    /// 7200 blocks ≈ 12 hours (6 second block time)
+    pub const CooldownPeriod: BlockNumber = 7200;
+
+    /// Maximum total airdrops allowed per account
+    /// Prevents single accounts from draining the pool
+    pub const MaxAirdropsPerAccount: u32 = 10;
+}
+
+impl pallet_airdrop::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Currency = Balances;
+    type PalletId = AirdropPalletId;
+    type AirdropAmount = AirdropAmount;
+    type MinimumBalanceThreshold = MinimumBalanceThreshold;
+    type MaxAirdropsPerBlock = MaxAirdropsPerBlock;
+    type CooldownPeriod = CooldownPeriod;
+    type MaxAirdropsPerAccount = MaxAirdropsPerAccount;
 }
 
 impl pallet_sudo::Config for Runtime {
