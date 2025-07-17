@@ -295,7 +295,7 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         /// Claim an airdrop if eligible
         #[pallet::call_index(0)]
-        #[pallet::weight(T::DbWeight::get().reads_writes(4, 3))]
+        #[pallet::weight((Weight::zero(), Pays::No))]
         pub fn claim_airdrop(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             Self::do_airdrop(&who)?;
