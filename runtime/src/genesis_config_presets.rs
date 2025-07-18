@@ -1,7 +1,7 @@
 use crate::{
     configs::MaxActiveValidators, AccountId, AirdropConfig, BabeConfig, Balance, BalancesConfig,
     RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, SudoConfig,
-    BABE_GENESIS_EPOCH_CONFIG,
+    BABE_GENESIS_EPOCH_CONFIG, UNIT,
 };
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
@@ -39,7 +39,7 @@ fn testnet_genesis(
             keys: initial_authorities.into_iter().map(|x| { (x.0, x.1, x.2.clone()) }).collect(),
         },
         airdrop: AirdropConfig {
-            initial_funding: 1u128 << 80,
+            initial_funding: 60 * 10_u128.pow(6) * UNIT, // 60 million
             pre_funded_accounts: Default::default()
         },
         staking: StakingConfig {
