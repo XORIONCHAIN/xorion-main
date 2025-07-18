@@ -5997,6 +5997,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-airdrop-rpc"
+version = "0.1.0"
+dependencies = [
+    "jsonrpsee",
+    "pallet-airdrop-rpc-api",
+    "parity-scale-codec",
+    "serde",
+    "sp-api",
+    "sp-blockchain",
+    "sp-core",
+    "sp-runtime",
+]
+
+[[package]]
+name = "pallet-airdrop-rpc-api"
+version = "0.1.0"
+dependencies = [
+    "parity-scale-codec",
+    "sp-api",
+]
+
+[[package]]
 name = "pallet-authority-discovery"
 version = "40.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk.git?branch=stable2503#8d2e11a6aee7f2f3d3636c78a35a2e715e2885e5"
@@ -12956,6 +12978,8 @@ dependencies = [
  "futures",
  "jsonrpsee",
  "mmr-rpc",
+    "pallet-airdrop-rpc",
+    "pallet-airdrop-rpc-api",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "sc-authority-discovery",
@@ -13016,6 +13040,7 @@ dependencies = [
  "frame-try-runtime",
  "log",
     "pallet-airdrop",
+    "pallet-airdrop-rpc-api",
  "pallet-authority-discovery",
  "pallet-authorship",
  "pallet-babe",

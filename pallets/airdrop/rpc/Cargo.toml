@@ -1,0 +1,32 @@
+[package]
+name = "pallet-airdrop-rpc"
+version = "0.1.0"
+edition = "2021"
+description = "RPC methods for the airdrop pallet"
+authors = ["Kofi Otuo <otuokofi@outlook.com>"]
+license = "Apache-2.0"
+
+[dependencies]
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive"] }
+serde = { version = "1.0", features = ["derive"], default-features = false }
+
+# Substrate dependencies
+sp-api = { workspace = true, default-features = false }
+sp-blockchain = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
+sp-core = { workspace = true, default-features = false }
+
+# RPC dependencies
+jsonrpsee = { workspace = true, features = ["server", "macros", "client-core"] }
+
+pallet-airdrop-rpc-api = { path = "../rpc/api" }
+
+[features]
+default = ["std"]
+std = [
+    "codec/std",
+    "serde/std",
+    "sp-api/std",
+    "sp-runtime/std",
+    "sp-core/std",
+]

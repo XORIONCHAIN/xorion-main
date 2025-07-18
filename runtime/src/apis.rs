@@ -25,7 +25,7 @@
 
 // Local module imports
 use super::{
-    AccountId, AuthorityDiscovery, Babe, Balance, Block, BlockNumber, Executive, Grandpa,
+    AccountId, Airdrop, AuthorityDiscovery, Babe, Balance, Block, BlockNumber, Executive, Grandpa,
     Historical, InherentDataExt, Mmr, Nonce, Runtime, RuntimeCall, RuntimeGenesisConfig,
     SessionKeys, System, TransactionPayment, BABE_GENESIS_EPOCH_CONFIG, VERSION,
 };
@@ -284,6 +284,21 @@ impl_runtime_apis! {
         ) -> Result<(), mmr::Error> {
             let nodes = leaves.into_iter().map(|leaf|mmr::DataOrHash::Data(leaf.into_opaque_leaf())).collect();
             pallet_mmr::verify_leaves_proof::<mmr::Hashing, _>(root, nodes, proof)
+        }
+    }
+
+    impl pallet_airdrop_rpc_api::AirdropApi<Block, AccountId, Balance, BlockNumber> for Runtime {
+        fn is_eligible_for_airdrop(who: AccountId) -> bool {
+            Airdrop::is_eligible_for_airdrop(&who)
+        }
+
+        fn get_cooldown_remaining(who: AccountId) -> BlockNumber {
+            Airdrop::get_cooldown_remaining(&who)
+        }
+
+        fn get_airdrop_pool_balance() -> Balance {
+            let airdrop_account = Airdrop::airdrop_account_id();
+            <Runtime as pallet_airdrop::Config>::Currency::free_balance(&airdrop_account)
         }
     }
 
