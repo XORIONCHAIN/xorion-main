@@ -1,7 +1,7 @@
 use frame_support::{
-    derive_impl,
+    PalletId, derive_impl,
     pallet_prelude::{ConstU32, Hooks},
-    parameter_types, PalletId,
+    parameter_types,
 };
 use sp_runtime::BuildStorage;
 

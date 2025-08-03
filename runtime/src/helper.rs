@@ -16,10 +16,6 @@
 #[macro_export]
 macro_rules! prod_or_fast {
     ($prod:expr, $test:expr) => {
-        if cfg!(feature = "fast-runtime") {
-            $test
-        } else {
-            $prod
-        }
+        if cfg!(feature = "fast-runtime") { $test } else { $prod }
     };
 }
