@@ -23,7 +23,7 @@ use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 use sp_keystore::KeystorePtr;
 use substrate_state_trie_migration_rpc::{StateMigration, StateMigrationApiServer};
-use xorion_runtime::{opaque::Block, AccountId, Balance, BlockNumber, Hash, Nonce};
+use xorion_runtime::{AccountId, Balance, BlockNumber, Hash, Nonce, opaque::Block};
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {
@@ -88,7 +88,6 @@ where
     C::Api: BabeApi<Block>,
     C::Api: BlockBuilder<Block>,
     C::Api: pallet_airdrop_rpc_api::AirdropApi<Block, AccountId, Balance, BlockNumber>,
-
     P: TransactionPool + 'static,
     SC: SelectChain<Block> + 'static,
     B: sc_client_api::Backend<Block> + Send + Sync + 'static,

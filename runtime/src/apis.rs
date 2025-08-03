@@ -25,12 +25,12 @@
 
 // Local module imports
 use super::{
-    AccountId, Airdrop, AuthorityDiscovery, Babe, Balance, Block, BlockNumber, Executive, Grandpa,
-    Historical, InherentDataExt, Mmr, Nonce, Runtime, RuntimeCall, RuntimeGenesisConfig,
-    SessionKeys, System, TransactionPayment, BABE_GENESIS_EPOCH_CONFIG, VERSION,
+    AccountId, Airdrop, AuthorityDiscovery, BABE_GENESIS_EPOCH_CONFIG, Babe, Balance, Block,
+    BlockNumber, Executive, Grandpa, Historical, InherentDataExt, Mmr, Nonce, Runtime, RuntimeCall,
+    RuntimeGenesisConfig, SessionKeys, System, TransactionPayment, VERSION,
 };
 // External crates imports
-use crate::configs::{mmr, EpochDuration};
+use crate::configs::{EpochDuration, mmr};
 use alloc::vec::Vec;
 use frame_support::{
     genesis_builder_helper::{build_state, get_preset},
@@ -39,11 +39,11 @@ use frame_support::{
 };
 use pallet_grandpa::AuthorityId as GrandpaId;
 use sp_api::impl_runtime_apis;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_core::{OpaqueMetadata, crypto::KeyTypeId};
 use sp_runtime::{
+    ApplyExtrinsicResult,
     traits::{Block as BlockT, NumberFor},
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult,
 };
 use sp_version::RuntimeVersion;
 

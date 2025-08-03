@@ -27,45 +27,43 @@ pub mod check_nonce;
 
 // Local module imports
 use super::{
-    AccountId, Balance, Balances, Block, BlockNumber, Hash, Nonce, PalletInfo, Runtime,
-    RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
-    System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, UNIT, VERSION,
+    AccountId, Balance, Balances, Block, BlockNumber, EXISTENTIAL_DEPOSIT, Hash, Nonce, PalletInfo,
+    Runtime, RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin,
+    RuntimeTask, SLOT_DURATION, System, UNIT, VERSION,
 };
 // Substrate and Polkadot dependencies
 use crate::{
-    bag_thresholds, deposit,
-    governance::{pallet_custom_origins, StakingAdmin},
-    prod_or_fast, Babe, DelegatedStaking, ElectionProviderMultiPhase, Historical, Moment,
-    NominationPools, NposCompactSolution16, Offences, OnChainAccuracy, Session, SessionKeys,
-    Signature, Staking, Timestamp, TransactionPayment, TxExtension, UncheckedExtrinsic, VoterList,
-    CENTS, EPOCH_DURATION_IN_SLOTS, MILLI_SECS_PER_BLOCK, MINUTES,
+    Babe, CENTS, DelegatedStaking, EPOCH_DURATION_IN_SLOTS, ElectionProviderMultiPhase, Historical,
+    MILLI_SECS_PER_BLOCK, MINUTES, Moment, NominationPools, NposCompactSolution16, Offences,
+    OnChainAccuracy, Session, SessionKeys, Signature, Staking, Timestamp, TransactionPayment,
+    TxExtension, UncheckedExtrinsic, VoterList, bag_thresholds, deposit,
+    governance::{StakingAdmin, pallet_custom_origins},
+    prod_or_fast,
 };
 use frame_election_provider_support::{
-    bounds::ElectionBoundsBuilder, onchain, Get, SequentialPhragmen,
+    Get, SequentialPhragmen, bounds::ElectionBoundsBuilder, onchain,
 };
 use frame_support::{
-    derive_impl,
+    PalletId, derive_impl,
     pallet_prelude::DispatchClass,
     parameter_types,
-    traits::{ConstU128, ConstU32, ConstU64, ConstU8, EitherOf, Nothing, VariantCountOf},
+    traits::{ConstU8, ConstU32, ConstU64, ConstU128, EitherOf, Nothing, VariantCountOf},
     weights::{
-        constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
         IdentityFee, Weight,
+        constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
     },
-    PalletId,
 };
 use frame_system::{
-    limits::{BlockLength, BlockWeights},
     EnsureRoot,
+    limits::{BlockLength, BlockWeights},
 };
 use pallet_election_provider_multi_phase::GeometricDepositBase;
 use pallet_staking::UseValidatorsMap;
 use pallet_transaction_payment::{ConstFeeMultiplier, FungibleAdapter, Multiplier};
 use sp_runtime::{
-    traits,
+    FixedPointNumber, FixedU128, Perbill, Percent, SaturatedConversion, traits,
     traits::{IdentityLookup, Keccak256, One, OpaqueKeys},
     transaction_validity::TransactionPriority,
-    FixedPointNumber, FixedU128, Perbill, Percent, SaturatedConversion,
 };
 use sp_staking::{EraIndex, SessionIndex};
 use sp_version::RuntimeVersion;
@@ -651,4 +649,28 @@ impl pallet_mmr::Config for Runtime {
 
 impl pallet_authority_discovery::Config for Runtime {
     type MaxAuthorities = MaxAuthorities;
+}
+
+parameter_types! {
+    /// A unique identifier for the confidential transactions pallet.
+    /// Used to derive the sovereign account that holds the shielded pool funds.
+    pub const ConfidentialTransactionsPalletId: PalletId = PalletId(*b"xorionct");
+
+    /// The depth of the Merkle tree used for storing commitments.
+    /// A depth of 32 allows for 2^32 (over 4 billion) leaves.
+    pub const TreeDepth: u32 = 32;
+}
+
+impl pallet_private_transactions::Config for Runtime {
+    /// The runtime's event type.
+    type RuntimeEvent = RuntimeEvent;
+
+    /// The currency type for managing public funds and fees.
+    type Currency = Balances;
+
+    /// The PalletId for creating the sovereign account.
+    type PalletId = ConfidentialTransactionsPalletId;
+
+    /// The depth of the Merkle tree.
+    type TreeDepth = TreeDepth;
 }

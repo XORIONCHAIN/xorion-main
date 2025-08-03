@@ -1,6 +1,6 @@
 use crate::{
-    mock::{new_test_ext, run_to_block, AccountId, Airdrop, Balances, RuntimeOrigin, System, Test},
     Error, Event, PalletId,
+    mock::{AccountId, Airdrop, Balances, RuntimeOrigin, System, Test, new_test_ext, run_to_block},
 };
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::traits::AccountIdConversion;

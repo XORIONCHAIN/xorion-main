@@ -1,7 +1,7 @@
 use crate::{
-    configs::MaxActiveValidators, AccountId, AirdropConfig, BabeConfig, Balance, BalancesConfig,
-    RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, SudoConfig,
-    BABE_GENESIS_EPOCH_CONFIG, UNIT,
+    AccountId, AirdropConfig, BABE_GENESIS_EPOCH_CONFIG, BabeConfig, Balance, BalancesConfig,
+    RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, SudoConfig, UNIT,
+    configs::MaxActiveValidators,
 };
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
@@ -10,7 +10,7 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{
-    crypto::{get_public_from_string_or_panic, Ss58Codec},
+    crypto::{Ss58Codec, get_public_from_string_or_panic},
     sr25519,
 };
 use sp_genesis_builder::{self, PresetId};

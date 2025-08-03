@@ -34,6 +34,7 @@ pallet-balances.workspace = true
 pallet-grandpa.workspace = true
 pallet-sudo.workspace = true
 pallet-airdrop.workspace = true
+pallet-private-transactions.workspace = true
 pallet-airdrop-rpc-api.workspace = true
 pallet-mmr.workspace = true
 pallet-statement.workspace = true
@@ -92,6 +93,7 @@ std = [
     "pallet-grandpa/std",
     "pallet-sudo/std",
     "pallet-airdrop/std",
+    "pallet-private-transactions/std",
     "pallet-airdrop-rpc-api/std",
     "pallet-timestamp/std",
     "pallet-transaction-payment-rpc-runtime-api/std",
