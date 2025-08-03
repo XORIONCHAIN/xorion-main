@@ -229,6 +229,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "ark-crypto-primitives"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e0c292754729c8a190e50414fd1a37093c786c709899f29c9f7daccecfa855e"
+dependencies = [
+    "ahash",
+    "ark-crypto-primitives-macros",
+    "ark-ec 0.5.0",
+    "ark-ff 0.5.0",
+    "ark-r1cs-std",
+    "ark-relations",
+    "ark-serialize 0.5.0",
+    "ark-snark",
+    "ark-std 0.5.0",
+    "blake2 0.10.6",
+    "derivative",
+    "digest 0.10.7",
+    "fnv",
+    "hashbrown 0.14.5",
+    "merlin",
+    "sha2 0.10.9",
+    "tracing",
+]
+
+[[package]]
+name = "ark-crypto-primitives-macros"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e7e89fe77d1f0f4fe5b96dfc940923d88d17b6a773808124f21e764dfb063c6a"
+dependencies = [
+    "proc-macro2",
+    "quote",
+    "syn 2.0.104",
+]
+
+[[package]]
 name = "ark-ec"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -365,6 +401,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ark-groth16"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88f1d0f3a534bb54188b8dcc104307db6c56cdae574ddc3212aec0625740fc7e"
+dependencies = [
+    "ark-crypto-primitives",
+    "ark-ec 0.5.0",
+    "ark-ff 0.5.0",
+    "ark-poly 0.5.0",
+    "ark-r1cs-std",
+    "ark-relations",
+    "ark-serialize 0.5.0",
+    "ark-std 0.5.0",
+    "derivative",
+    "tracing",
+]
+
+[[package]]
 name = "ark-poly"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -390,6 +444,35 @@ dependencies = [
  "educe",
  "fnv",
     "hashbrown 0.15.4",
+]
+
+[[package]]
+name = "ark-r1cs-std"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "941551ef1df4c7a401de7068758db6503598e6f01850bdb2cfdb614a1f9dbea1"
+dependencies = [
+    "ark-ec 0.5.0",
+    "ark-ff 0.5.0",
+    "ark-relations",
+    "ark-std 0.5.0",
+    "educe",
+    "num-bigint",
+    "num-integer",
+    "num-traits",
+    "tracing",
+]
+
+[[package]]
+name = "ark-relations"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec46ddc93e7af44bcab5230937635b06fb5744464dd6a7e7b083e80ebd274384"
+dependencies = [
+    "ark-ff 0.5.0",
+    "ark-std 0.5.0",
+    "tracing",
+    "tracing-subscriber 0.2.25",
 ]
 
 [[package]]
@@ -437,6 +520,18 @@ dependencies = [
  "proc-macro2",
  "quote",
     "syn 2.0.104",
+]
+
+[[package]]
+name = "ark-snark"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d368e2848c2d4c129ce7679a7d0d2d612b6a274d3ea6a13bad4445d61b381b88"
+dependencies = [
+    "ark-ff 0.5.0",
+    "ark-relations",
+    "ark-serialize 0.5.0",
+    "ark-std 0.5.0",
 ]
 
 [[package]]
@@ -5184,7 +5279,7 @@ dependencies = [
  "generator",
  "scoped-tls",
  "tracing",
- "tracing-subscriber",
+    "tracing-subscriber 0.3.19",
 ]
 
 [[package]]
@@ -6221,6 +6316,29 @@ dependencies = [
  "serde",
  "sp-runtime",
  "sp-staking",
+]
+
+[[package]]
+name = "pallet-private-transactions"
+version = "0.1.0"
+dependencies = [
+    "ark-bls12-381 0.5.0",
+    "ark-crypto-primitives",
+    "ark-ec 0.5.0",
+    "ark-ff 0.5.0",
+    "ark-groth16",
+    "ark-serialize 0.5.0",
+    "ark-snark",
+    "ark-std 0.5.0",
+    "frame-support",
+    "frame-system",
+    "pallet-balances",
+    "parity-scale-codec",
+    "scale-info",
+    "sp-core",
+    "sp-io",
+    "sp-runtime",
+    "sp-std",
 ]
 
 [[package]]
@@ -9083,7 +9201,7 @@ dependencies = [
  "thiserror 1.0.69",
  "tracing",
  "tracing-log",
- "tracing-subscriber",
+    "tracing-subscriber 0.3.19",
 ]
 
 [[package]]
@@ -10489,7 +10607,7 @@ dependencies = [
  "parity-scale-codec",
  "tracing",
  "tracing-core",
- "tracing-subscriber",
+    "tracing-subscriber 0.3.19",
 ]
 
 [[package]]
@@ -11558,6 +11676,15 @@ dependencies = [
  "log",
  "once_cell",
  "tracing-core",
+]
+
+[[package]]
+name = "tracing-subscriber"
+version = "0.2.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e0d2eaa99c3c2e41547cfa109e910a68ea03823cccad4a0525dcbc9b01e8c71"
+dependencies = [
+    "tracing-core",
 ]
 
 [[package]]
@@ -13052,6 +13179,7 @@ dependencies = [
  "pallet-mmr",
  "pallet-nomination-pools",
  "pallet-offences",
+    "pallet-private-transactions",
  "pallet-session",
  "pallet-staking",
  "pallet-statement",

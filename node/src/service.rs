@@ -1,13 +1,13 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-use crate::rpc::{create_full, BabeDeps, FullDeps, GrandpaDeps};
+use crate::rpc::{BabeDeps, FullDeps, GrandpaDeps, create_full};
 use futures::FutureExt;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus_babe::SlotProportion;
 use sc_consensus_grandpa::SharedVoterState;
 use sc_network::Event;
 use sc_rpc::SubscriptionTaskExecutor;
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager, WarpSyncConfig};
+use sc_service::{Configuration, TaskManager, WarpSyncConfig, error::Error as ServiceError};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use std::{sync::Arc, time::Duration};
@@ -34,7 +34,8 @@ pub fn new_partial(
         sc_consensus::DefaultImportQueue<Block>,
         sc_transaction_pool::TransactionPoolHandle<Block, FullClient>,
         (
-            impl Fn(SubscriptionTaskExecutor) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
+            impl Fn(SubscriptionTaskExecutor) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>
+            + use<>,
             (
                 sc_consensus_babe::BabeBlockImport<
                     Block,

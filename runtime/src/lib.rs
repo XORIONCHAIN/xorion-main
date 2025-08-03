@@ -13,9 +13,8 @@ pub mod configs;
 use alloc::vec::Vec;
 use scale_info::prelude::vec;
 use sp_runtime::{
-    generic, impl_opaque_keys,
+    MultiSignature, generic, impl_opaque_keys,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiSignature,
 };
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -74,9 +73,8 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // The version of the runtime specification. A full node will not attempt to use its native
     //   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     //   `spec_version`, and `authoring_version` are the same between Wasm and native.
-    // This value is set to 100 to notify Polkadot-JS App (https://polkadot.js.org/apps) to use
-    //   the compatible custom types.
-    spec_version: 100,
+    // This value is set to 101 - upgrade from previous 100
+    spec_version: 101,
     impl_version: 1,
     apis: apis::RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -93,7 +91,7 @@ pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
     };
 
 mod block_times {
-    use crate::{prod_or_fast, BlockNumber, HOURS, MINUTES};
+    use crate::{BlockNumber, HOURS, MINUTES, prod_or_fast};
 
     /// This determines the average expected block time that we are targeting. Blocks will be
     /// produced at a minimum duration defined by `SLOT_DURATION`. `SLOT_DURATION` is picked up by
@@ -109,7 +107,7 @@ mod block_times {
     pub const EPOCH_DURATION_IN_SLOTS: BlockNumber = prod_or_fast!(1 * HOURS, 1 * MINUTES);
 }
 use crate::{
-    configs::{check_nonce::CheckNonce, MaxElectingVoters},
+    configs::{MaxElectingVoters, check_nonce::CheckNonce},
     governance::pallet_custom_origins,
 };
 pub use block_times::*;
@@ -300,4 +298,7 @@ mod runtime {
 
     #[runtime::pallet_index(19)]
     pub type Airdrop = pallet_airdrop;
+
+    #[runtime::pallet_index(20)]
+    pub type ConfidentialTransactions = pallet_private_transactions;
 }

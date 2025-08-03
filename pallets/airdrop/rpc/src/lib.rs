@@ -42,16 +42,6 @@ pub trait AirdropRpc<BlockHash, AccountId, Balance, BlockNumber> {
     async fn get_airdrop_pool_balance(&self, at: Option<BlockHash>) -> RpcResult<Balance>;
 }
 
-// Comprehensive airdrop status structure
-#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct AirdropStatus<BlockNumber, Balance> {
-    pub is_eligible: bool,
-    pub cooldown_remaining: BlockNumber,
-    pub record: Option<AirdropRecord<BlockNumber, Balance>>,
-    pub pool_balance: Balance,
-    pub airdrops_this_block: u32,
-}
-
 // RPC implementation
 pub struct AirdropRpcImpl<C, Block> {
     client: Arc<C>,

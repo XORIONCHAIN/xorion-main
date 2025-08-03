@@ -1,0 +1,61 @@
+[package]
+name = "pallet-private-transactions"
+version = "0.1.0"
+description = "A pallet for confidential transactions using zk-SNARKs."
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+codec = { features = ["derive"], workspace = true }
+scale-info = { features = ["derive"], workspace = true }
+
+# Substrate FRAME Dependencies
+frame-support.workspace = true
+frame-system.workspace = true
+
+# Substrate Primitives
+sp-core.workspace = true
+sp-runtime.workspace = true
+sp-std.workspace = true
+sp-io.workspace = true
+
+# Arkworks zk-SNARK Dependencies
+ark-bls12-381 = "0.5.0"
+ark-groth16 = { version = "0.5.0", default-features = false, features = ["r1cs"] }
+ark-snark = { version = "0.5.1", default-features = false }
+ark-serialize = { version = "0.5.0", default-features = false, features = ["derive"] }
+# Arkworks primitives for Merkle Tree logic
+ark-crypto-primitives = { version = "0.5.0", default-features = false, features = ["crh", "merkle_tree"] }
+ark-ff = { version = "0.5.0", default-features = false }
+ark-std = { version = "0.5.0", default-features = false }
+
+
+[dev-dependencies]
+pallet-balances.workspace = true
+ark-ec = { version = "0.5.0", default-features = false }
+
+
+[features]
+default = ["std"]
+std = [
+    "codec/std",
+    "frame-support/std",
+    "frame-system/std",
+    "sp-core/std",
+    "sp-runtime/std",
+    "sp-std/std",
+    "sp-io/std",
+    "ark-bls12-381/std",
+    "ark-groth16/std",
+    "ark-serialize/std",
+    "ark-crypto-primitives/std",
+    "ark-ff/std",
+    "ark-ec/std",
+    "pallet-balances/std",
+]
