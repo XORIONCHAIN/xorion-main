@@ -108,6 +108,7 @@ mod merkle_tree {
 #[frame_support::pallet]
 pub mod pallet {
     use super::merkle_tree::Blake2s;
+    use ark_bn254::Bn254;
     use frame_support::{
         PalletId,
         dispatch::DispatchResult,
@@ -120,7 +121,7 @@ pub mod pallet {
     use sp_std::vec::Vec;
 
     // Arkworks ecosystem imports
-    use ark_bls12_381::{Bls12_381, Fr};
+    use ark_bn254::Fr;
     use ark_crypto_primitives::crh::TwoToOneCRHScheme;
     use ark_ff::PrimeField;
     use ark_groth16::{Groth16, Proof, VerifyingKey};
@@ -428,14 +429,14 @@ pub mod pallet {
             proof_bytes: &[u8],
             public_inputs_bytes: &[Vec<u8>],
         ) -> DispatchResult {
-            let vk = VerifyingKey::<Bls12_381>::deserialize_uncompressed(vk_bytes)
+            let vk = VerifyingKey::<Bn254>::deserialize_uncompressed(vk_bytes)
                 .map_err(|_| Error::<T>::MalformedVerificationKey)?;
-            let proof = Proof::<Bls12_381>::deserialize_uncompressed(proof_bytes)
+            let proof = Proof::<Bn254>::deserialize_uncompressed(proof_bytes)
                 .map_err(|_| Error::<T>::MalformedProof)?;
             let public_inputs_fr: Vec<Fr> =
                 public_inputs_bytes.iter().map(|b| Fr::from_be_bytes_mod_order(b)).collect();
 
-            let verification_result = Groth16::<Bls12_381>::verify(&vk, &public_inputs_fr, &proof)
+            let verification_result = Groth16::<Bn254>::verify(&vk, &public_inputs_fr, &proof)
                 .map_err(|_| Error::<T>::InvalidProof)?;
 
             ensure!(verification_result, Error::<T>::InvalidProof);

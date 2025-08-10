@@ -1,4 +1,4 @@
-use ark_bls12_381::Bls12_381;
+use ark_bn254::Bn254;
 use ark_ec::pairing::Pairing;
 use ark_groth16::{Proof, VerifyingKey};
 use ark_serialize::CanonicalSerialize;
@@ -81,10 +81,10 @@ impl crate::Config for Test {
 
 /// Helper to create a valid, serialized but dummy verification key for testing.
 fn create_dummy_vk(num_public_inputs: u32) -> Vec<u8> {
-    let identity_g1 = <Bls12_381 as Pairing>::G1::default();
-    let identity_g2 = <Bls12_381 as Pairing>::G2::default();
+    let identity_g1 = <Bn254 as Pairing>::G1::default();
+    let identity_g2 = <Bn254 as Pairing>::G2::default();
 
-    let vk = VerifyingKey::<Bls12_381> {
+    let vk = VerifyingKey::<Bn254> {
         alpha_g1: identity_g1.into(),
         beta_g2: identity_g2.into(),
         gamma_g2: identity_g2.into(),
@@ -99,11 +99,11 @@ fn create_dummy_vk(num_public_inputs: u32) -> Vec<u8> {
 
 /// Helper to create a valid, serialized but dummy proof for testing.
 pub fn create_dummy_proof() -> Vec<u8> {
-    let identity_g1 = <Bls12_381 as Pairing>::G1::default();
-    let identity_g2 = <Bls12_381 as Pairing>::G2::default();
+    let identity_g1 = <Bn254 as Pairing>::G1::default();
+    let identity_g2 = <Bn254 as Pairing>::G2::default();
 
     let proof =
-        Proof::<Bls12_381> { a: identity_g1.into(), b: identity_g2.into(), c: identity_g1.into() };
+        Proof::<Bn254> { a: identity_g1.into(), b: identity_g2.into(), c: identity_g1.into() };
 
     let mut proof_bytes = Vec::new();
     proof.serialize_uncompressed(&mut proof_bytes).unwrap();

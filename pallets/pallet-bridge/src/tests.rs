@@ -105,7 +105,7 @@ fn release_transfers_and_reimburses_relayer_and_prevents_replay() {
         let locker: u64 = 1;
         let relayer_submitter: u64 = 2;
         let amount: u128 = 200;
-        let fee: u128 = 20;
+        let fee: u128 = 0;
         let eth_recipient = H160::repeat_byte(0xCC);
         let nonce: u64 = 9;
 
