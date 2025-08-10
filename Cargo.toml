@@ -11,6 +11,7 @@ members = [
     "pallets/airdrop",
     "pallets/airdrop/rpc",
     "pallets/airdrop/rpc/api",
+    "pallets/pallet-bridge",
     "pallets/private-transactions",
     "runtime",
 ]
@@ -19,6 +20,7 @@ resolver = "2"
 [workspace.dependencies]
 xorion-runtime = { path = "./runtime", default-features = false }
 pallet-airdrop = { path = "./pallets/airdrop", default-features = false }
+pallet-bridge = { path = "./pallets/pallet-bridge", default-features = false }
 pallet-private-transactions = { path = "./pallets/private-transactions", default-features = false }
 pallet-airdrop-rpc = { path = "./pallets/airdrop/rpc", default-features = false }
 pallet-airdrop-rpc-api = { path = "./pallets/airdrop/rpc/api", default-features = false }

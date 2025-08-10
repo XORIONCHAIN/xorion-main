@@ -25,6 +25,7 @@ frame-system.workspace = true
 frame-try-runtime = { optional = true, workspace = true }
 pallet-authority-discovery.workspace = true
 pallet-babe.workspace = true
+pallet-bridge.workspace = true
 pallet-session.workspace = true
 pallet-authorship.workspace = true
 pallet-staking.workspace = true
@@ -64,6 +65,7 @@ sp-statement-store.workspace = true
 sp-transaction-pool.workspace = true
 sp-version = { features = ["serde"], workspace = true }
 log = "0.4.27"
+hex = { version = "0.4.3", default-features = false }
 
 
 [build-dependencies]
@@ -93,6 +95,7 @@ std = [
     "pallet-grandpa/std",
     "pallet-sudo/std",
     "pallet-airdrop/std",
+    "pallet-bridge/std",
     "pallet-private-transactions/std",
     "pallet-airdrop-rpc-api/std",
     "pallet-timestamp/std",
@@ -123,6 +126,7 @@ std = [
     "sp-transaction-pool/std",
     "sp-version/std",
     "substrate-wasm-builder",
+    "hex/std"
 ]
 
 runtime-benchmarks = [

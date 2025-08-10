@@ -9,7 +9,7 @@ use sp_runtime::traits::AccountIdConversion;
 fn claim_airdrop_works() {
     new_test_ext().execute_with(|| {
         // Account 5 has balance 0 (below threshold of 100)
-        let initial_balance = Balances::free_balance(&5);
+        let initial_balance = Balances::free_balance(5);
         assert_eq!(initial_balance, 0);
 
         // Account 2 should be eligible for airdrop
@@ -19,10 +19,10 @@ fn claim_airdrop_works() {
         assert_ok!(Airdrop::claim_airdrop(RuntimeOrigin::signed(5)));
 
         // Check balance increased
-        assert_eq!(Balances::free_balance(&5), 1000);
+        assert_eq!(Balances::free_balance(5), 1000);
 
         // Check airdrop record was created
-        let record = Airdrop::airdrop_records(&5).unwrap();
+        let record = Airdrop::airdrop_records(5).unwrap();
         assert_eq!(record.claims_count, 1);
         assert_eq!(record.last_claim_block, 1);
         assert_eq!(record.total_received, 1000);
@@ -39,7 +39,7 @@ fn claim_airdrop_works() {
 fn claim_airdrop_fails_for_funded_account() {
     new_test_ext().execute_with(|| {
         // Account 1 has balance 5000 (above threshold of 100)
-        assert_eq!(Balances::free_balance(&1), 5000);
+        assert_eq!(Balances::free_balance(1), 5000);
 
         // Should not be eligible
         assert!(!Airdrop::is_eligible_for_airdrop(&1));
@@ -89,7 +89,7 @@ fn cooldown_period_works() {
         assert_ok!(Airdrop::claim_airdrop(RuntimeOrigin::signed(2)));
 
         // Check record was updated
-        let record = Airdrop::airdrop_records(&2).unwrap();
+        let record = Airdrop::airdrop_records(2).unwrap();
         assert_eq!(record.claims_count, 2);
         assert_eq!(record.last_claim_block, 6);
     });
@@ -112,7 +112,7 @@ fn max_airdrops_per_account_works() {
         }
 
         // Check record
-        let record = Airdrop::airdrop_records(&account).unwrap();
+        let record = Airdrop::airdrop_records(account).unwrap();
         assert_eq!(record.claims_count, 3);
 
         // Fourth claim should fail
@@ -171,13 +171,13 @@ fn insufficient_funds_error() {
 fn fund_airdrop_pool_works() {
     new_test_ext().execute_with(|| {
         let airdrop_account = Airdrop::airdrop_account_id();
-        let initial_balance = Balances::free_balance(&airdrop_account); // Should be 9000
+        let initial_balance = Balances::free_balance(airdrop_account); // Should be 9000
 
         // Fund the pool
         assert_ok!(Airdrop::fund_airdrop_pool(RuntimeOrigin::root(), 5000));
 
         // Check balance increased
-        assert_eq!(Balances::free_balance(&airdrop_account), initial_balance + 5000);
+        assert_eq!(Balances::free_balance(airdrop_account), initial_balance + 5000);
 
         // Check event was emitted
         System::assert_last_event(Event::AirdropFunded { amount: 5000 }.into());
@@ -301,7 +301,7 @@ fn multiple_claims_update_record_correctly() {
 
         // First claim
         assert_ok!(Airdrop::claim_airdrop(RuntimeOrigin::signed(account)));
-        let record1 = Airdrop::airdrop_records(&account).unwrap();
+        let record1 = Airdrop::airdrop_records(account).unwrap();
         assert_eq!(record1.claims_count, 1);
         assert_eq!(record1.total_received, 1000);
 
@@ -310,7 +310,7 @@ fn multiple_claims_update_record_correctly() {
         let _ = Balances::slash(&account, 1000); // Reduce balance
         assert_ok!(Airdrop::claim_airdrop(RuntimeOrigin::signed(account)));
 
-        let record2 = Airdrop::airdrop_records(&account).unwrap();
+        let record2 = Airdrop::airdrop_records(account).unwrap();
         assert_eq!(record2.claims_count, 2);
         assert_eq!(record2.total_received, 2000);
         assert_eq!(record2.last_claim_block, 7);

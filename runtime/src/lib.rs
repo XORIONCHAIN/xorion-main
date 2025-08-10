@@ -301,4 +301,7 @@ mod runtime {
 
     #[runtime::pallet_index(20)]
     pub type ConfidentialTransactions = pallet_private_transactions;
+
+    #[runtime::pallet_index(21)]
+    pub type EthereumBridge = pallet_bridge;
 }
