@@ -674,3 +674,17 @@ impl pallet_private_transactions::Config for Runtime {
     /// The depth of the Merkle tree.
     type TreeDepth = TreeDepth;
 }
+
+parameter_types! {
+    pub const BridgePalletId: PalletId = PalletId(*b"brdglock");
+    pub const RelayerThreshold: u32 = 1; // require 1 signature for now
+    pub const MaxSignatures: u32 = 10;   // max 10 signatures per release
+}
+
+impl pallet_bridge::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Currency = Balances;
+    type BridgePalletId = BridgePalletId;
+    type RelayerThreshold = RelayerThreshold;
+    type MaxSignatures = MaxSignatures;
+}

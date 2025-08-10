@@ -131,10 +131,10 @@ fn genesis_config_works() {
     new_test_ext().execute_with(|| {
         // Check airdrop pool is funded
         let airdrop_account = Airdrop::airdrop_account_id();
-        assert_eq!(Balances::free_balance(&airdrop_account), 19000);
+        assert_eq!(Balances::free_balance(airdrop_account), 19000);
 
         // Check that account 4 was pre-funded
-        assert_eq!(Airdrop::airdrop_records(&4).unwrap().claims_count, 1);
-        assert_eq!(Balances::free_balance(&4), 1000);
+        assert_eq!(Airdrop::airdrop_records(4).unwrap().claims_count, 1);
+        assert_eq!(Balances::free_balance(4), 1000);
     });
 }

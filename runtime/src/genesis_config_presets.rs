@@ -1,7 +1,7 @@
 use crate::{
     AccountId, AirdropConfig, BABE_GENESIS_EPOCH_CONFIG, BabeConfig, Balance, BalancesConfig,
-    RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, SudoConfig, UNIT,
-    configs::MaxActiveValidators,
+    ConfidentialTransactionsConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
+    StakingConfig, SudoConfig, UNIT, configs::MaxActiveValidators,
 };
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
@@ -24,6 +24,9 @@ fn testnet_genesis(
     root: AccountId,
     stakers: Vec<Staker>,
 ) -> Value {
+    let depo = &include_str!("../../verifier_key.hex")[2..];
+    let depo = hex::decode(depo).unwrap();
+    let trans = include_bytes!("../../verifier_key01.hex").to_vec();
     let validator_count = initial_authorities.len() as u32;
 
     build_struct_json_patch!(RuntimeGenesisConfig {
@@ -47,6 +50,11 @@ fn testnet_genesis(
             minimum_validator_count: validator_count,
             invulnerables: endowed_accounts,
             stakers
+        },
+        confidential_transactions: ConfidentialTransactionsConfig {
+            deposit_vk: depo,
+            transfer_vk: trans,
+            _phantom: Default::default()
         },
         babe: BabeConfig { epoch_config: BABE_GENESIS_EPOCH_CONFIG },
         sudo: SudoConfig { key: Some(root) },

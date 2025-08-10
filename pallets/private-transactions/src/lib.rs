@@ -307,7 +307,7 @@ pub mod pallet {
 
             // Verify the Merkle root from the public inputs matches the on-chain root.
             let merkle_root =
-                H256::from_slice(public_inputs.get(0).ok_or(Error::<T>::InvalidPublicInputs)?);
+                H256::from_slice(public_inputs.first().ok_or(Error::<T>::InvalidPublicInputs)?);
             ensure!(merkle_root == Self::merkle_root(), Error::<T>::InvalidMerkleRoot);
 
             // Verify the withdrawal proof.
@@ -352,7 +352,7 @@ pub mod pallet {
             let vk = Self::transfer_vk().ok_or(Error::<T>::TransferVerificationKeyNotSet)?;
 
             let merkle_root =
-                H256::from_slice(public_inputs.get(0).ok_or(Error::<T>::InvalidPublicInputs)?);
+                H256::from_slice(public_inputs.first().ok_or(Error::<T>::InvalidPublicInputs)?);
             ensure!(merkle_root == Self::merkle_root(), Error::<T>::InvalidMerkleRoot);
 
             Self::verify_proof_internal(&vk, &proof, &public_inputs)?;
@@ -428,9 +428,9 @@ pub mod pallet {
             proof_bytes: &[u8],
             public_inputs_bytes: &[Vec<u8>],
         ) -> DispatchResult {
-            let vk = VerifyingKey::<Bls12_381>::deserialize_uncompressed(&*vk_bytes)
+            let vk = VerifyingKey::<Bls12_381>::deserialize_uncompressed(vk_bytes)
                 .map_err(|_| Error::<T>::MalformedVerificationKey)?;
-            let proof = Proof::<Bls12_381>::deserialize_uncompressed(&*proof_bytes)
+            let proof = Proof::<Bls12_381>::deserialize_uncompressed(proof_bytes)
                 .map_err(|_| Error::<T>::MalformedProof)?;
             let public_inputs_fr: Vec<Fr> =
                 public_inputs_bytes.iter().map(|b| Fr::from_be_bytes_mod_order(b)).collect();
