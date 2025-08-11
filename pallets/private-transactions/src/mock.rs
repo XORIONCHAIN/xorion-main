@@ -1,9 +1,13 @@
-use ark_bls12_381::Bls12_381;
-use ark_ec::pairing::Pairing;
+use ark_bn254::{Bn254, G1Projective, G2Projective};
 use ark_groth16::{Proof, VerifyingKey};
 use ark_serialize::CanonicalSerialize;
+use ark_std::{
+    UniformRand,
+    rand::{SeedableRng, prelude::StdRng},
+};
 use frame_support::{PalletId, derive_impl, pallet_prelude::ConstU32, parameter_types};
 use sp_runtime::BuildStorage;
+use std::{fs, sync::OnceLock};
 
 type Block = frame_system::mocking::MockBlock<Test>;
 
@@ -80,35 +84,38 @@ impl crate::Config for Test {
 }
 
 /// Helper to create a valid, serialized but dummy verification key for testing.
-fn create_dummy_vk(num_public_inputs: u32) -> Vec<u8> {
-    let identity_g1 = <Bls12_381 as Pairing>::G1::default();
-    let identity_g2 = <Bls12_381 as Pairing>::G2::default();
+/// Other variable is Proof
+fn create_dummy_vk(num_public_inputs: u32) -> (Vec<u8>, Vec<u8>) {
+    // 1. Create a deterministic random number generator for reproducibility
+    let mut rng = StdRng::seed_from_u64(42);
 
-    let vk = VerifyingKey::<Bls12_381> {
-        alpha_g1: identity_g1.into(),
-        beta_g2: identity_g2.into(),
-        gamma_g2: identity_g2.into(),
-        delta_g2: identity_g2.into(),
-        gamma_abc_g1: vec![identity_g1.into(); (num_public_inputs + 1) as usize],
+    // 2. Generate random points on the G1 and G2 curves
+    let alpha_g1 = G1Projective::rand(&mut rng);
+    let beta_g2 = G2Projective::default();
+
+    // 3. Generate a random vector of G1 points for the IC
+    let gamma_abc_g1 = vec![alpha_g1.into(); (num_public_inputs + 1) as usize];
+
+    // 4. Construct the Verifying Key
+    let vk = VerifyingKey::<Bn254> {
+        alpha_g1: alpha_g1.into(),
+        beta_g2: beta_g2.into(),
+        gamma_g2: beta_g2.into(),
+        delta_g2: beta_g2.into(),
+        gamma_abc_g1,
     };
 
     let mut vk_bytes = Vec::new();
+
     vk.serialize_uncompressed(&mut vk_bytes).unwrap();
-    vk_bytes
-}
-
-/// Helper to create a valid, serialized but dummy proof for testing.
-pub fn create_dummy_proof() -> Vec<u8> {
-    let identity_g1 = <Bls12_381 as Pairing>::G1::default();
-    let identity_g2 = <Bls12_381 as Pairing>::G2::default();
-
-    let proof =
-        Proof::<Bls12_381> { a: identity_g1.into(), b: identity_g2.into(), c: identity_g1.into() };
-
+    let proof = Proof::<Bn254> { a: alpha_g1.into(), b: beta_g2.into(), c: alpha_g1.into() };
     let mut proof_bytes = Vec::new();
     proof.serialize_uncompressed(&mut proof_bytes).unwrap();
-    proof_bytes
+    (vk_bytes, proof_bytes)
 }
+
+pub static DEPOSIT_PROOF: OnceLock<Vec<u8>> = OnceLock::new();
+pub static TRANSFER_PROOF: OnceLock<Vec<u8>> = OnceLock::new();
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
@@ -124,9 +131,17 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
     // Configure genesis for our pallet by creating and serializing
     // structurally valid (but dummy) verification keys.
+    let (deposit_vk, deposit_proof) = create_dummy_vk(2);
+    let (transfer_vk, transfer_proof) = create_dummy_vk(5);
+    fs::write("vk_depo", hex::encode(&deposit_vk)).unwrap();
+    fs::write("vk_trans", hex::encode(&transfer_vk)).unwrap();
+    fs::write("proof_dep", hex::encode(&deposit_proof)).unwrap();
+    fs::write("proof_trans", hex::encode(&transfer_proof)).unwrap();
+    _ = DEPOSIT_PROOF.set(deposit_proof);
+    _ = TRANSFER_PROOF.set(transfer_proof);
     crate::GenesisConfig::<Test> {
-        deposit_vk: create_dummy_vk(2), // For deposit circuit with 2 public inputs
-        transfer_vk: create_dummy_vk(5), // For transfer circuit with 5 public inputs
+        deposit_vk,  // For deposit circuit with 2 public inputs
+        transfer_vk, // For transfer circuit with 5 public inputs
         _phantom: Default::default(),
     }
     .assimilate_storage(&mut storage)

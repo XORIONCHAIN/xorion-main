@@ -21,7 +21,7 @@ fn deposit_works() {
         // Perform the deposit
         assert_ok!(ConfidentialTransactions::deposit(
             RuntimeOrigin::signed(depositor),
-            create_dummy_proof(),
+            DEPOSIT_PROOF.get().unwrap().clone(),
             public_inputs,
             amount
         ));
@@ -53,7 +53,7 @@ fn withdraw_works() {
             vec![amount.to_be_bytes().to_vec(), commitment_hash.as_bytes().to_vec()];
         assert_ok!(ConfidentialTransactions::deposit(
             RuntimeOrigin::signed(depositor),
-            create_dummy_proof(),
+            DEPOSIT_PROOF.get().unwrap().clone(),
             deposit_inputs,
             amount
         ));
@@ -77,7 +77,7 @@ fn withdraw_works() {
         // Perform the withdrawal
         assert_ok!(ConfidentialTransactions::withdraw(
             RuntimeOrigin::signed(depositor), // `depositor` pays the fee
-            create_dummy_proof(),
+            TRANSFER_PROOF.get().unwrap().clone(),
             withdraw_inputs,
             recipient,
             amount
@@ -105,7 +105,7 @@ fn withdraw_fails_on_used_nullifier() {
             vec![amount.to_be_bytes().to_vec(), commitment_hash.as_bytes().to_vec()];
         assert_ok!(ConfidentialTransactions::deposit(
             RuntimeOrigin::signed(depositor),
-            create_dummy_proof(),
+            DEPOSIT_PROOF.get().unwrap().clone(),
             deposit_inputs,
             amount
         ));
@@ -122,7 +122,7 @@ fn withdraw_fails_on_used_nullifier() {
         // First withdrawal should work
         assert_ok!(ConfidentialTransactions::withdraw(
             RuntimeOrigin::signed(depositor),
-            create_dummy_proof(),
+            DEPOSIT_PROOF.get().unwrap().clone(),
             withdraw_inputs.clone(),
             recipient,
             amount
@@ -132,7 +132,7 @@ fn withdraw_fails_on_used_nullifier() {
         assert_noop!(
             ConfidentialTransactions::withdraw(
                 RuntimeOrigin::signed(depositor),
-                create_dummy_proof(),
+                TRANSFER_PROOF.get().unwrap().clone(),
                 withdraw_inputs,
                 recipient,
                 amount
@@ -148,13 +148,13 @@ fn transact_works() {
         // Deposit two notes to be used as inputs
         assert_ok!(ConfidentialTransactions::deposit(
             RuntimeOrigin::signed(1),
-            create_dummy_proof(),
+            DEPOSIT_PROOF.get().unwrap().clone(),
             vec![10u64.to_be_bytes().to_vec(), H256::from_low_u64_be(1).as_bytes().to_vec()],
             10
         ));
         assert_ok!(ConfidentialTransactions::deposit(
             RuntimeOrigin::signed(1),
-            create_dummy_proof(),
+            TRANSFER_PROOF.get().unwrap().clone(),
             vec![5u64.to_be_bytes().to_vec(), H256::from_low_u64_be(2).as_bytes().to_vec()],
             5
         ));
@@ -183,7 +183,7 @@ fn transact_works() {
         // Perform the transaction
         assert_ok!(ConfidentialTransactions::transact(
             RuntimeOrigin::signed(1),
-            create_dummy_proof(),
+            DEPOSIT_PROOF.get().unwrap().clone(),
             transact_inputs
         ));
 
