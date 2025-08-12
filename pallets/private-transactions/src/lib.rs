@@ -209,6 +209,10 @@ pub mod pallet {
         Withdraw(T::AccountId, BalanceOf<T>),
         /// A confidential transaction was successful.
         TransactionSuccess,
+        /// DepositVerificationKeySet
+        DepositVerificationKeySet,
+        /// TransferVerificationKeySet
+        TransferVerificationKeySet,
     }
 
     #[pallet::error]
@@ -377,6 +381,26 @@ pub mod pallet {
             Self::insert_leaf(commitment2)?;
 
             Self::deposit_event(Event::TransactionSuccess);
+            Ok(())
+        }
+
+        #[pallet::call_index(3)]
+        #[pallet::weight(T::DbWeight::get().reads_writes(5, 7))]
+        pub fn set_deposit_verification_key(origin: OriginFor<T>, vk: Vec<u8>) -> DispatchResult {
+            ensure_root(origin)?; // Only root can call this
+
+            DepositVerificationKey::<T>::put(&vk);
+            Self::deposit_event(Event::DepositVerificationKeySet);
+            Ok(())
+        }
+
+        #[pallet::call_index(4)]
+        #[pallet::weight(T::DbWeight::get().reads_writes(5, 7))]
+        pub fn set_transfer_verification_key(origin: OriginFor<T>, vk: Vec<u8>) -> DispatchResult {
+            ensure_root(origin)?; // Only root can call this
+
+            TransferVerificationKey::<T>::put(&vk);
+            Self::deposit_event(Event::TransferVerificationKeySet);
             Ok(())
         }
     }
