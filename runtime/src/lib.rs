@@ -1,5 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::identity_op)]
+#![recursion_limit = "1024"]
 
 extern crate alloc;
 #[cfg(feature = "std")]
@@ -304,4 +305,9 @@ mod runtime {
 
     #[runtime::pallet_index(21)]
     pub type EthereumBridge = pallet_bridge;
+    #[runtime::pallet_index(22)]
+    pub type Contracts = pallet_contracts;
+
+    #[runtime::pallet_index(23)]
+    pub type RandomnessCollectiveFlip = pallet_insecure_randomness_collective_flip;
 }

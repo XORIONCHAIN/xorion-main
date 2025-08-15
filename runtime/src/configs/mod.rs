@@ -35,8 +35,8 @@ use super::{
 use crate::{
     Babe, CENTS, DelegatedStaking, EPOCH_DURATION_IN_SLOTS, ElectionProviderMultiPhase, Historical,
     MILLI_SECS_PER_BLOCK, MINUTES, Moment, NominationPools, NposCompactSolution16, Offences,
-    OnChainAccuracy, Session, SessionKeys, Signature, Staking, Timestamp, TransactionPayment,
-    TxExtension, UncheckedExtrinsic, VoterList, bag_thresholds, deposit,
+    OnChainAccuracy, RandomnessCollectiveFlip, Session, SessionKeys, Signature, Staking, Timestamp,
+    TransactionPayment, TxExtension, UncheckedExtrinsic, VoterList, bag_thresholds, deposit,
     governance::{StakingAdmin, pallet_custom_origins},
     prod_or_fast,
 };
@@ -54,12 +54,13 @@ use frame_support::{
     },
 };
 use frame_system::{
-    EnsureRoot,
+    EnsureRoot, EnsureSigned,
     limits::{BlockLength, BlockWeights},
 };
 use pallet_election_provider_multi_phase::GeometricDepositBase;
 use pallet_staking::UseValidatorsMap;
 use pallet_transaction_payment::{ConstFeeMultiplier, FungibleAdapter, Multiplier};
+use sp_core::ConstBool;
 use sp_runtime::{
     FixedPointNumber, FixedU128, Perbill, Percent, SaturatedConversion, traits,
     traits::{IdentityLookup, Keccak256, One, OpaqueKeys},
@@ -687,4 +688,56 @@ impl pallet_bridge::Config for Runtime {
     type BridgePalletId = BridgePalletId;
     type RelayerThreshold = RelayerThreshold;
     type MaxSignatures = MaxSignatures;
+}
+
+impl pallet_insecure_randomness_collective_flip::Config for Runtime {}
+
+parameter_types! {
+    pub const DepositPerItem: Balance = deposit(1, 0);
+    pub const DepositPerByte: Balance = deposit(0, 1);
+    pub const DefaultDepositLimit: Balance = deposit(1024, 1024 * 1024);
+    pub Schedule: pallet_contracts::Schedule<Runtime> = Default::default();
+    pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
+}
+
+impl pallet_contracts::Config for Runtime {
+    type Time = Timestamp;
+    type Randomness = RandomnessCollectiveFlip;
+    type Currency = Balances;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeCall = RuntimeCall;
+    type RuntimeHoldReason = RuntimeHoldReason;
+    /// The safest default is to allow no calls at all.
+    ///
+    /// Runtimes should whitelist dispatchables that are allowed to be called from contracts
+    /// and make sure they are stable. Dispatchables exposed to contracts are not allowed to
+    /// change because that would break already deployed contracts. The `Call` structure itself
+    /// is not allowed to change the indices of existing pallets, too.
+    type CallFilter = Nothing;
+    type WeightPrice = pallet_transaction_payment::Pallet<Self>;
+    type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
+    type ChainExtension = ();
+    type Schedule = Schedule;
+    type CallStack = [pallet_contracts::Frame<Self>; 5];
+    type DepositPerByte = DepositPerByte;
+    type DefaultDepositLimit = DefaultDepositLimit;
+    type DepositPerItem = DepositPerItem;
+    type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
+    type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
+    type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
+    type MaxStorageKeyLen = ConstU32<128>;
+    type MaxTransientStorageSize = ConstU32<{ 1 * 1024 * 1024 }>;
+    type MaxDelegateDependencies = ConstU32<32>;
+    type UnsafeUnstableInterface = ConstBool<false>;
+    type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
+    type UploadOrigin = EnsureSigned<Self::AccountId>;
+    type InstantiateOrigin = EnsureSigned<Self::AccountId>;
+    #[cfg(not(feature = "runtime-benchmarks"))]
+    type Migrations = ();
+    #[cfg(feature = "runtime-benchmarks")]
+    type Migrations = pallet_contracts::migration::codegen::BenchMigrations;
+    type Debug = ();
+    type Environment = ();
+    type ApiVersion = ();
+    type Xcm = ();
 }

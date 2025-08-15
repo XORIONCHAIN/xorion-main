@@ -85,6 +85,8 @@ pallet-authority-discovery = { git = "https://github.com/paritytech/polkadot-sdk
 pallet-babe = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-authorship = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
+pallet-contracts = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
+pallet-insecure-randomness-collective-flip = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-grandpa = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-sudo = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-timestamp = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
