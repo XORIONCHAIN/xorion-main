@@ -25,6 +25,8 @@ frame-system.workspace = true
 frame-try-runtime = { optional = true, workspace = true }
 pallet-authority-discovery.workspace = true
 pallet-babe.workspace = true
+pallet-contracts.workspace = true
+pallet-insecure-randomness-collective-flip.workspace = true
 pallet-bridge.workspace = true
 pallet-session.workspace = true
 pallet-authorship.workspace = true
@@ -92,6 +94,8 @@ std = [
     "pallet-offences/std",
     "pallet-staking/std",
     "pallet-balances/std",
+    "pallet-contracts/std",
+    "pallet-insecure-randomness-collective-flip/std",
     "pallet-grandpa/std",
     "pallet-sudo/std",
     "pallet-airdrop/std",
