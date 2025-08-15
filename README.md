@@ -142,8 +142,8 @@ an active validator.
     - Submit the bonding transaction
 
 2. **Set Session Keys:**
-    - After bonding, you'll see options to either "Set Session Key" or "Nominate"
-    - Click **"Set Session Key"**
+    - After bonding, you'll see options to either "Session Key" or "Nominate"
+    - Click **"Session Key"**
     - Enter the session keys (the hex string from step 1)
     - Submit the transaction and wait for confirmation
 
@@ -190,9 +190,9 @@ Optimized for serving RPC requests to applications and wallets.
   --rpc-methods unsafe \
   --rpc-port 9944 \
   --rpc-max-connections 1000 \
-  --rpc-max-request-size 15 \
-  --rpc-max-response-size 15 \
-  --rpc-max-subscriptions-per-connection 1024 \
+  --rpc-max-request-size 25 \
+  --rpc-max-response-size 25 \
+  --rpc-max-subscriptions-per-connection 4096 \
   --rpc-cors all
 ```
 
