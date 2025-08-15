@@ -1,230 +1,476 @@
-# Xorion Node
+# Xorion Test Network Connection Guide
 
-A standalone version of this template is available for each release of Polkadot
-in the [Substrate Developer Hub Parachain
-Template](https://github.com/substrate-developer-hub/substrate-node-template/)
-repository. The parachain template is generated directly at each Polkadot
-release branch from the [Solochain Template in
-Substrate](https://github.com/paritytech/polkadot-sdk/tree/master/templates/solochain)
-upstream
+This guide explains how to connect to the Xorion network using different node configurations. Whether you want to run a
+full node, validator, light client, or RPC node, this documentation will help you get connected to the live network.
 
-It is usually best to use the stand-alone version to start a new project. All
-bugs, suggestions, and feature requests should be made upstream in the
-[Substrate](https://github.com/paritytech/polkadot-sdk/tree/master/substrate)
-repository.
+## Prerequisites
+
+Ensure you have the required dependencies installed for your platform. Check
+the [Polkadot installation guide](https://docs.polkadot.com/develop/parachains/install-polkadot-sdk/) for
+platform-specific requirements.
 
 ## Getting Started
 
-Depending on your operating system and Rust version, there might be additional
-packages required to compile this template. Check the
-[Install](https://docs.substrate.io/install/) instructions for your platform for
-the most common dependencies. Alternatively, you can use one of the [alternative
-installation](#alternatives-installations) options.
-
-Fetch solochain template code:
+Clone the Xorion node repository:
 
 ```sh
 git clone https://github.com/Kofituo/xorion-node.git
-
 cd xorion-node
 ```
 
-### Build
-
-🔨 Use the following command to build the node without launching it:
+Build the node:
 
 ```sh
 cargo build --release
 ```
 
-### Embedded Docs
+## Network Connection Types
 
-After you build the project, you can use the following command to explore its
-parameters and subcommands:
+### 1. Full Node (Archive)
 
-```sh
-./target/release/xorion-node -h
-```
-
-You can generate and view the [Rust
-Docs](https://doc.rust-lang.org/cargo/commands/cargo-doc.html) for this template
-with this command:
+A full node stores the complete blockchain history and can serve historical data to other nodes and applications.
 
 ```sh
-cargo +nightly doc --open
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --blocks-pruning archive \
+  --rpc-external \
+  --rpc-methods safe \
+  --rpc-port 9944 \
+  --rpc-cors all
 ```
 
-### Single-Node Development Chain
+**Key Parameters:**
 
-The following command starts a single-node development chain that doesn't
-persist state:
+- `--chain xorion-testnet-spec.json`: Connects to the Xorion testnet
+- `--blocks-pruning archive`: Keeps full blockchain history
+- `--base-path ./xorion-data`: Data directory for blockchain storage
+- `--rpc-external`: Allows external RPC connections
+- `--rpc-cors all`: Allows cross-origin requests
+
+### 2. Light Client
+
+For light client functionality, use fast sync mode with minimal storage requirements:
 
 ```sh
-./target/debug/xorion-node --dev
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-light \
+  --sync fast \
+  --in-peers 16 \
+  --out-peers 8 \
+  --rpc-external \
+  --rpc-methods safe \
+  --rpc-port 9944
 ```
 
-To purge the development chain's state, run the following command:
+**Benefits:**
+
+- Fast initial sync with `--sync fast`
+- Lower resource requirements
+- Reduced peer connections for efficiency
+
+### 3. Validator Node
+
+Validators participate in consensus and block production. **Note:** You need sufficient stake and nomination to become
+an active validator.
+
+**Validator Setup Process:**
+
+1. **Generate Session Keys Locally (Recommended):**
+
+   **Important:** The Xorion network requires three session keys in this specific order:
+    - **BABE** (Sr25519) - for block authoring
+    - **GRANDPA** (Ed25519) - for finality gadget
+    - **Authority Discovery** (Sr25519) - for peer discovery
+
+   ```sh
+   # Generate keys locally in the required order
+   # 1. BABE key (Sr25519)
+   ./target/release/xorion-node key generate --scheme Sr25519 --keystore-path ./validator-keystore --key-type babe
+
+   # 2. GRANDPA key (Ed25519)
+   ./target/release/xorion-node key generate --scheme Ed25519 --keystore-path ./validator-keystore --key-type gran
+
+   # 3. Authority Discovery key (Sr25519)
+   ./target/release/xorion-node key generate --scheme Sr25519 --keystore-path ./validator-keystore --key-type audi
+   ```
+
+   Alternative: Generate via RPC:
+   ```sh
+   curl -H "Content-Type: application/json" \
+        -d '{"id":1, "jsonrpc":"2.0", "method": "author_rotateKeys", "params":[]}' \
+        http://localhost:9944
+   ```
+
+   **Note:** When using RPC generation, the returned hex string contains all three keys concatenated in the correct
+   order (BABE + GRANDPA + Authority Discovery).
+
+
+2. **Generate Node Key**
+
+    ```sh
+    ./target/release/xorion-node key generate-node-key --file node-key
+    ```
+
+   Use the generated `node-key` file and `validator-keystore` to start the validator node.
+
+    ```sh
+    ./target/release/xorion-node \
+      --chain xorion-testnet-spec.json \
+      --base-path ./xorion-validator \
+      --validator \
+      --name "YourValidatorName" \
+      --blocks-pruning 10000 \
+      --state-pruning 10000 \
+      --node-key-file ./node-key \
+      --keystore-path ./validator-keystore \
+      --public-addr /ip4/YOUR_PUBLIC_IP/tcp/30334
+    ```
+
+3. **Bond Your Tokens:**
+    - Go to Network > Staking > Account Actions in Polkadot-JS Apps
+    - Click "+ Stash" to start bonding process
+    - Choose your **Stash account** (holds the funds to be bonded)
+    - Select your **Controller account** (can be same as stash or different)
+    - Choose **Reward destination**:
+        - **Stash account (increase amount at stake)**: Rewards compound automatically
+        - **Controller account**: Rewards go to controller, not staked automatically
+        - **Specified payment account**: Send rewards to any account you choose
+    - Enter the amount to bond (leave some for transaction fees)
+    - Submit the bonding transaction
+
+2. **Set Session Keys:**
+    - After bonding, you'll see options to either "Set Session Key" or "Nominate"
+    - Click **"Set Session Key"**
+    - Enter the session keys (the hex string from step 1)
+    - Submit the transaction and wait for confirmation
+
+3. **Start Validating:**
+    - Once session keys are set correctly, the **"Validate"** option will appear
+    - Click "Validate"
+    - Set your **validator preferences**:
+        - **Reward commission**: Percentage you keep from nominator rewards (0-100%)
+        - **Blocked nominators**: Option to block specific nominators
+    - Submit the validate transaction
+    - Your validator will be active in the next era if you have enough stake
+
+**Important Notes:**
+
+- Your bonded funds will be **locked** for the unbonding period (typically 28 days on most networks)
+- You need minimum stake to be in the active validator set
+- Session keys should be kept secure and backed up safely
+
+**Security Setup for Validators:**
 
 ```sh
-./target/release/xorion-node purge-chain --dev
+# Validator node (private, no RPC)
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-validator \
+  --validator \
+  --name "YourValidatorName" \
+  --node-key-file ./node-key \
+  --keystore-path ./validator-keystore \ 
+  --reserved-only \
+  --reserved-nodes /ip4/SENTRY_IP/tcp/30333/p2p/SENTRY_PEER_ID
 ```
 
-To start the development chain with detailed logging, run the following command:
+### 4. RPC Node
+
+Optimized for serving RPC requests to applications and wallets.
 
 ```sh
-RUST_BACKTRACE=1 ./target/release/xorion-node -ldebug --dev
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-rpc \
+  --rpc-external \
+  --unsafe-rpc-external \
+  --rpc-methods unsafe \
+  --rpc-port 9944 \
+  --rpc-max-connections 1000 \
+  --rpc-max-request-size 15 \
+  --rpc-max-response-size 15 \
+  --rpc-max-subscriptions-per-connection 1024 \
+  --rpc-cors all
 ```
 
-Development chains:
+**Security Note:** Only use `--rpc-methods unsafe` and `--unsafe-rpc-external` on trusted networks with proper access
+controls.
 
-- Maintain state in a `tmp` folder while the node is running.
-- Use the **Alice** and **Bob** accounts as default validator authorities.
-- Use the **Alice** account as the default `sudo` account.
-- Are preconfigured with a genesis state (`/node/src/chain_spec.rs`) that
-  includes several pre-funded development accounts.
+### 5. Archive Node
 
-
-To persist chain state between runs, specify a base path by running a command
-similar to the following:
+For applications requiring full historical data access:
 
 ```sh
-// Create a folder to use as the db base path
-$ mkdir my-chain-state
-
-// Use of that folder to store the chain state
-$ ./target/release/xorion-node --dev --base-path ./my-chain-state/
-
-// Check the folder structure created inside the base path after running the chain
-$ ls ./my-chain-state
-chains
-$ ls ./my-chain-state/chains/
-dev
-$ ls ./my-chain-state/chains/dev
-db keystore network
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-archive \
+  --blocks-pruning archive \
+  --state-pruning archive \
+  --rpc-external \
+  --rpc-methods safe \
+  --rpc-port 9944 \
+  --db-cache 4096
 ```
 
-### Connect with Polkadot-JS Apps Front-End
+### 6. Sentry Node
 
-After you start the node template locally, you can interact with it using the
-hosted version of the [Polkadot/Substrate
-Portal](https://polkadot.js.org/apps/#/explorer?rpc=ws://localhost:9944)
-front-end by connecting to the local node endpoint. A hosted version is also
-available on [IPFS](https://dotapps.io/). You can
-also find the source code and instructions for hosting your own instance in the
-[`polkadot-js/apps`](https://github.com/polkadot-js/apps) repository.
+Sentry nodes protect validators by acting as intermediaries:
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-sentry \
+  --name "SentryNode" \
+  --rpc-external \
+  --rpc-methods safe \
+  --public-addr /ip4/YOUR_PUBLIC_IP/tcp/30333 \
+  --reserved-nodes /ip4/VALIDATOR_PRIVATE_IP/tcp/30333/p2p/VALIDATOR_PEER_ID
+```
+
+## Network Configuration Options
+
+### Boot Nodes
+
+Connect to specific boot nodes for network discovery:
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --bootnodes /ip4/1.2.3.4/tcp/30333/p2p/12D3KooW... \
+  --bootnodes /ip4/5.6.7.8/tcp/30333/p2p/12D3KooW...
+```
+
+### Reserved Peers
+
+For guaranteed connections to specific trusted nodes:
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --reserved-nodes /ip4/1.2.3.4/tcp/30333/p2p/12D3KooW... \
+  --reserved-only
+```
+
+### Network Ports and Addressing
+
+Configure custom ports and addresses:
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --port 30334 \
+  --rpc-port 9945 \
+  --listen-addr /ip4/0.0.0.0/tcp/30334 \
+  --public-addr /ip4/YOUR_PUBLIC_IP/tcp/30334
+```
+
+## Advanced Configuration
+
+### Sync Modes
+
+Choose appropriate sync strategy:
+
+```sh
+# Full sync (default)
+--sync full
+
+# Fast sync (recommended for most users)
+--sync fast
+
+# Warp sync (fastest initial sync)
+--sync warp
+```
+
+### Database Backend
+
+Select database backend for optimal performance:
+
+```sh
+# RocksDB (default)
+--database rocksdb
+
+# ParityDB (experimental, better for SSDs)
+--database paritydb
+```
+
+### Memory and Performance Tuning
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --db-cache 2048 \
+  --trie-cache-size 1073741824 \
+  --max-runtime-instances 16 \
+  --pool-limit 16384 \
+  --pool-kbytes 40960
+```
+
+### Peer Connection Limits
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --in-peers 64 \
+  --out-peers 16 \
+  --in-peers-light 200 \
+  --max-parallel-downloads 10
+```
+
+## Monitoring and Telemetry
+
+### Enable Telemetry
+
+Send node metrics to telemetry servers:
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --telemetry-url 'wss://telemetry.polkadot.io/submit/ 0' \
+  --name "YourNodeName"
+```
+
+### Prometheus Metrics
+
+Enable Prometheus endpoint for monitoring:
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --prometheus-external \
+  --prometheus-port 9615
+```
+
+### Detailed Logging
+
+Configure logging for debugging:
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --log runtime=debug,babe=trace \
+  --detailed-log-output
+```
+
+## Connecting Applications
+
+### Polkadot-JS Apps
+
+1. Open [Polkadot-JS Apps](https://polkadot.js.org/apps/)
+2. Click the network dropdown (top-left)
+3. Select "Development" > "Local Node"
+4. Change endpoint to `ws://localhost:9944` (or your custom port)
+5. Click "Switch"
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+1. **Port conflicts**: Ensure ports aren't already in use
+   ```sh
+   netstat -tulpn | grep :9944
+   ```
+
+2. **Permission issues**: Ensure proper directory permissions
+   ```sh
+   chmod -R 755 ./xorion-data
+   ```
+
+3. **Sync problems**: Clear database and resync
+   ```sh
+   ./target/release/xorion-node purge-chain \
+     --chain xorion-testnet-spec.json \
+     --base-path ./xorion-data
+   ```
+
+### Debug Mode
+
+Run with debug logging for troubleshooting:
+
+```sh
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --base-path ./xorion-data \
+  --log debug \
+  --detailed-log-output
+```
+
+## Security Best Practices
+
+### Validator Security
+
+1. **Firewall configuration**: Only allow necessary ports
+2. **Key management**: Store session keys securely
+3. **Monitoring**: Set up alerts for validator performance
+
+### RPC Security
+
+1. Use `--rpc-methods safe` for public endpoints
+2. Implement rate limiting: `--rpc-rate-limit 100`
+3. Whitelist trusted IPs: `--rpc-rate-limit-whitelisted-ips 192.168.1.0/24`
+4. Use reverse proxy with authentication for sensitive endpoints
+
+### Network Security
+
+```sh
+# Secure validator setup
+./target/release/xorion-node \
+  --chain xorion-testnet-spec.json \
+  --validator \
+  --base-path ./xorion-validator \
+  --reserved-only \
+  --reserved-nodes /ip4/SENTRY_IP/tcp/30333/p2p/SENTRY_PEER_ID \
+  --no-private-ip
+```
+
+## Development and Testing
+
+### Local Development Chain
+
+```sh
+./target/release/xorion-node \
+  --dev \
+  --tmp \
+  --alice
+```
 
 ### Multi-Node Local Testnet
 
-If you want to see the multi-node consensus algorithm in action, see [Simulate a
-network](https://docs.substrate.io/tutorials/build-a-blockchain/simulate-network/).
+```sh
+# Node 1 (Alice)
+./target/release/xorion-node \
+  --chain=local \
+  --alice \
+  --tmp \
+  --port 30333
 
-## Template Structure
+# Node 2 (Bob)  
+./target/release/xorion-node \
+  --chain=local \
+  --bob \
+  --tmp \
+  --port 30334 \
+  --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/NODE1_PEER_ID
+```
 
-A Substrate project such as this consists of a number of components that are
-spread across a few directories.
+## Support and Resources
 
-### Node
+- **GitHub Issues**: [xorion-node/issues](https://github.com/Kofituo/xorion-node/issues)
+- **Community**: [Polkadot Discord](https://discord.gg/c4VVaRVdKq)
 
-A blockchain node is an application that allows users to participate in a
-blockchain network. Substrate-based blockchain nodes expose a number of
-capabilities:
+For additional help with specific command options, use:
 
-- Networking: Substrate nodes use the [`libp2p`](https://libp2p.io/) networking
-  stack to allow the nodes in the network to communicate with one another.
-- Consensus: Blockchains must have a way to come to
-  [consensus](https://docs.substrate.io/fundamentals/consensus/) on the state of
-  the network. Substrate makes it possible to supply custom consensus engines
-  and also ships with several consensus mechanisms that have been built on top
-  of [Web3 Foundation
-  research](https://research.web3.foundation/Polkadot/protocols/NPoS).
-- RPC Server: A remote procedure call (RPC) server is used to interact with
-  Substrate nodes.
-
-There are several files in the `node` directory. Take special note of the
-following:
-
-- [`chain_spec.rs`](./node/src/chain_spec.rs): A [chain
-  specification](https://docs.substrate.io/build/chain-spec/) is a source code
-  file that defines a Substrate chain's initial (genesis) state. Chain
-  specifications are useful for development and testing, and critical when
-  architecting the launch of a production chain. Take note of the
-  `development_config` and `testnet_genesis` functions. These functions are
-  used to define the genesis state for the local development chain
-  configuration. These functions identify some [well-known
-  accounts](https://docs.substrate.io/reference/command-line-tools/subkey/) and
-  use them to configure the blockchain's initial state.
-- [`service.rs`](./node/src/service.rs): This file defines the node
-  implementation. Take note of the libraries that this file imports and the
-  names of the functions it invokes. In particular, there are references to
-  consensus-related topics, such as the [block finalization and
-  forks](https://docs.substrate.io/fundamentals/consensus/#finalization-and-forks)
-  and other [consensus
-  mechanisms](https://docs.substrate.io/fundamentals/consensus/#default-consensus-models)
-  such as Aura for block authoring and GRANDPA for finality.
-
-
-### Runtime
-
-In Substrate, the terms "runtime" and "state transition function" are analogous.
-Both terms refer to the core logic of the blockchain that is responsible for
-validating blocks and executing the state changes they define. The Substrate
-project in this repository uses
-[FRAME](https://docs.substrate.io/learn/runtime-development/#frame) to construct
-a blockchain runtime. FRAME allows runtime developers to declare domain-specific
-logic in modules called "pallets". At the heart of FRAME is a helpful [macro
-language](https://docs.substrate.io/reference/frame-macros/) that makes it easy
-to create pallets and flexibly compose them to create blockchains that can
-address [a variety of needs](https://substrate.io/ecosystem/projects/).
-
-Review the [FRAME runtime implementation](./runtime/src/lib.rs) included in this
-template and note the following:
-
-- This file configures several pallets to include in the runtime. Each pallet
-  configuration is defined by a code block that begins with `impl
-  $PALLET_NAME::Config for Runtime`.
-- The pallets are composed into a single runtime by way of the
-  [#[runtime]](https://paritytech.github.io/polkadot-sdk/master/frame_support/attr.runtime.html)
-  macro, which is part of the [core FRAME pallet
-  library](https://docs.substrate.io/reference/frame-pallets/#system-pallets).
-
-### Pallets
-
-The runtime in this project is constructed using many FRAME pallets that ship
-with [the Substrate
-repository](https://github.com/paritytech/polkadot-sdk/tree/master/substrate/frame) and a
-template pallet that is [defined in the
-`pallets`](./pallets/template/src/lib.rs) directory.
-
-A FRAME pallet is comprised of a number of blockchain primitives, including:
-
-- Storage: FRAME defines a rich set of powerful [storage
-  abstractions](https://docs.substrate.io/build/runtime-storage/) that makes it
-  easy to use Substrate's efficient key-value database to manage the evolving
-  state of a blockchain.
-- Dispatchables: FRAME pallets define special types of functions that can be
-  invoked (dispatched) from outside of the runtime in order to update its state.
-- Events: Substrate uses
-  [events](https://docs.substrate.io/build/events-and-errors/) to notify users
-  of significant state changes.
-- Errors: When a dispatchable fails, it returns an error.
-
-Each pallet has its own `Config` trait which serves as a configuration interface
-to generically define the types and parameters it depends on.
-
-## Alternatives Installations
-
-Instead of installing dependencies and building this source directly, consider
-the following alternatives.
-
-### Nix
-
-Install [nix](https://nixos.org/) and
-[nix-direnv](https://github.com/nix-community/nix-direnv) for a fully
-plug-and-play experience for setting up the development environment. To get all
-the correct dependencies, activate direnv `direnv allow`.
-
-### Docker
-
-Please follow the [Substrate Docker instructions
-here](https://github.com/paritytech/polkadot-sdk/blob/master/substrate/docker/README.md) to
-build the Docker container with the Substrate Node Template binary.
+```sh
+./target/release/xorion-node --help
+./target/release/xorion-node <command> --help
+```
