@@ -85,11 +85,15 @@ pub mod pallet {
     pub(super) type ProcessedMessages<T: Config> =
         StorageMap<_, Blake2_128Concat, [u8; 32], bool, ValueQuery>;
 
-    /// Global fund used to reimburse relayers when an individual lock had no relayer_fee (owner
-    /// must top up).
+    /// Total amount of native assets locked for bridging to Ethereum.
     #[pallet::storage]
-    #[pallet::getter(fn relayer_fund)]
-    pub(super) type RelayerFund<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+    #[pallet::getter(fn total_locked)]
+    pub(super) type TotalLocked<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+
+    /// Total amount of native assets released on this chain from Ethereum.
+    #[pallet::storage]
+    #[pallet::getter(fn total_released)]
+    pub(super) type TotalReleased<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
     /// Paused flag (owner can pause emergency).
     #[pallet::storage]
@@ -206,6 +210,8 @@ pub mod pallet {
             let li = LockedInfo { owner: who.clone(), amount, relayer_fee, eth_recipient, nonce };
             LockedMessages::<T>::insert(id, li);
 
+            TotalLocked::<T>::mutate(|total| *total = total.saturating_add(amount));
+
             Self::deposit_event(Event::Locked(who, amount, relayer_fee, eth_recipient, nonce, id));
             Ok(())
         }
@@ -215,8 +221,6 @@ pub mod pallet {
         /// Ethereum or canonicalized on ETH side). `recipient` will receive the unlocked
         /// native tokens. `amount` expected amount to release (must be <= locked amount).
         /// `signatures` Vec<Vec<u8>> — each signature is 65 bytes r||s||v (v = 27/28 or 0/1).
-        /// The `submitter` (caller) receives the relayer_fee stored for the message, or a payout
-        /// from RelayerFund if none.
         #[pallet::call_index(1)]
         #[pallet::weight(Weight::from_all(10_000) + T::DbWeight::get().reads_writes(2,3))]
         pub fn release(
@@ -225,18 +229,12 @@ pub mod pallet {
             recipient: T::AccountId,
             amount: BalanceOf<T>,
             signatures: Vec<Vec<u8>>,
-            max_relayer_reward: Option<BalanceOf<T>>,
         ) -> DispatchResult {
-            let submitter = ensure_signed(origin)?;
+            let _submitter = ensure_signed(origin)?;
             ensure!(!Self::is_paused(), Error::<T>::Paused);
 
             // Check processed
             ensure!(!ProcessedMessages::<T>::get(message_id), Error::<T>::MessageAlreadyProcessed);
-
-            // Look up locked message
-            let locked = LockedMessages::<T>::get(message_id).ok_or(Error::<T>::NoLockedEntry)?;
-            ensure!(locked.amount >= amount, Error::<T>::InsufficientLockedAmount);
-
             // Validate number of signatures
             let sig_count = signatures.len() as u32;
             ensure!(sig_count <= T::MaxSignatures::get(), Error::<T>::TooManySignatures);
@@ -278,58 +276,13 @@ pub mod pallet {
 
             T::Currency::transfer(&pallet_acct, &recipient, amount, AllowDeath)?;
 
-            // Update locked record: reduce amount or remove
-            if locked.amount == amount {
-                // remove the entry
-                LockedMessages::<T>::remove(message_id);
-            } else {
-                let new_amount = locked.amount.saturating_sub(amount);
-                LockedMessages::<T>::mutate(message_id, |maybe| {
-                    if let Some(info) = maybe {
-                        info.amount = new_amount;
-                    }
-                });
-            }
-
-            // Pay relayer fee: prefer per-message relayer_fee first, fall back to RelayerFund up to
-            // max_relayer_reward
-            let mut paid: BalanceOf<T> = Zero::zero();
-            if locked.relayer_fee > Zero::zero() {
-                // Ensure pallet has enough balance to pay fee
-                let pf = T::Currency::free_balance(&pallet_acct);
-                if pf >= locked.relayer_fee {
-                    T::Currency::transfer(
-                        &pallet_acct,
-                        &submitter,
-                        locked.relayer_fee,
-                        AllowDeath,
-                    )?;
-                    paid = locked.relayer_fee;
-                }
-            } else {
-                // Try fund fallback
-                let fund = RelayerFund::<T>::get();
-                if fund > Zero::zero() {
-                    // compute payout = min(fund, max_relayer_reward.unwrap_or(fund))
-                    let cap = max_relayer_reward.unwrap_or(fund);
-                    let payout = if fund <= cap { fund } else { cap };
-                    let pallet_bal = T::Currency::free_balance(&pallet_acct);
-                    ensure!(pallet_bal >= payout, Error::<T>::RelayerFundInsufficient);
-                    // deduct from stored fund and transfer
-                    let new_fund = fund.saturating_sub(payout);
-                    RelayerFund::<T>::put(new_fund);
-                    T::Currency::transfer(&pallet_acct, &submitter, payout, AllowDeath)?;
-                    paid = payout;
-                }
-            }
-
             // mark processed to avoid replays
             ProcessedMessages::<T>::insert(message_id, true);
 
+            // total released amount
+            TotalReleased::<T>::mutate(|total| *total = total.saturating_add(amount));
+
             Self::deposit_event(Event::Released(recipient.clone(), amount, message_id));
-            if paid > Zero::zero() {
-                Self::deposit_event(Event::RelayerReimbursed(submitter.clone(), paid));
-            }
 
             Ok(())
         }
@@ -355,9 +308,6 @@ pub mod pallet {
             ensure!(amount > Zero::zero(), Error::<T>::InsufficientBalance);
             let pallet_acct = Self::account_id();
             T::Currency::transfer(&who, &pallet_acct, amount, AllowDeath)?;
-            let cur = RelayerFund::<T>::get();
-            let new = cur.saturating_add(amount);
-            RelayerFund::<T>::put(new);
             Self::deposit_event(Event::RelayerFundToppedUp(amount));
             Ok(())
         }
