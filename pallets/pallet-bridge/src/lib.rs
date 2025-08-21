@@ -109,8 +109,10 @@ pub mod pallet {
         Locked(T::AccountId, BalanceOf<T>, BalanceOf<T>, H160, u64, [u8; 32]),
 
         /// Funds released on Substrate (recipient got amount).
-        /// (recipient, amount, message_id)
-        Released(T::AccountId, BalanceOf<T>, [u8; 32]),
+        /// (recipient, amount, message_id, number of valid signatures)
+        /// (note: message_id is 32-byte hash of message on Ethereum side, not the
+        /// canonicalized message id emitted by Ethereum
+        Released(T::AccountId, BalanceOf<T>, [u8; 32], u32),
 
         /// Relayer reimbursed for finalizing a release.
         /// (relayer, amount)
@@ -282,7 +284,7 @@ pub mod pallet {
             // total released amount
             TotalReleased::<T>::mutate(|total| *total = total.saturating_add(amount));
 
-            Self::deposit_event(Event::Released(recipient.clone(), amount, message_id));
+            Self::deposit_event(Event::Released(recipient.clone(), amount, message_id, valid));
 
             Ok(())
         }
@@ -369,11 +371,18 @@ pub mod pallet {
             if sig.len() != 65 {
                 return Err(Error::<T>::InvalidSignature);
             }
-            // sp_io::crypto::secp256k1_ecdsa_recover expects signature with v in last byte
+            // 1. Construct the prefixed message
+            let mut prefixed_message = Vec::new();
+            prefixed_message.extend_from_slice(b"\x19Ethereum Signed Message:\n32");
+            prefixed_message.extend_from_slice(message_id);
+
+            // 2. Hash the prefixed message
+            let final_hash = keccak_256(&prefixed_message);
+
             let mut sig_arr = [0u8; 65];
             sig_arr.copy_from_slice(&sig[0..65]);
             // Note: secp256k1_ecdsa_recover expects a 32-byte message. We pass the raw message_id.
-            match secp256k1_ecdsa_recover(&sig_arr, message_id) {
+            match secp256k1_ecdsa_recover(&sig_arr, &final_hash) {
                 Ok(pubkey) => {
                     let hash = keccak_256(&pubkey);
                     let mut h160 = H160::default();
