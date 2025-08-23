@@ -107,10 +107,7 @@ mod block_times {
     pub const SLOT_DURATION: u64 = MILLI_SECS_PER_BLOCK;
     pub const EPOCH_DURATION_IN_SLOTS: BlockNumber = prod_or_fast!(1 * HOURS, 1 * MINUTES);
 }
-use crate::{
-    configs::{MaxElectingVoters, check_nonce::CheckNonce},
-    governance::pallet_custom_origins,
-};
+use crate::{configs::MaxElectingVoters, governance::pallet_custom_origins};
 pub use block_times::*;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
@@ -194,7 +191,7 @@ pub type TxExtension = (
     frame_system::CheckTxVersion<Runtime>,
     frame_system::CheckGenesis<Runtime>,
     frame_system::CheckEra<Runtime>,
-    CheckNonce<Runtime>,
+    frame_system::CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
     frame_metadata_hash_extension::CheckMetadataHash<Runtime>,
@@ -298,42 +295,45 @@ mod runtime {
     pub type Mmr = pallet_mmr::Pallet<Runtime>;
 
     #[runtime::pallet_index(19)]
-    pub type Airdrop = pallet_airdrop;
-
-    #[runtime::pallet_index(20)]
     pub type ConfidentialTransactions = pallet_private_transactions;
 
-    #[runtime::pallet_index(21)]
+    #[runtime::pallet_index(20)]
     pub type EthereumBridge = pallet_bridge;
-    #[runtime::pallet_index(22)]
+    #[runtime::pallet_index(21)]
     pub type Contracts = pallet_contracts;
-    #[runtime::pallet_index(23)]
+    #[runtime::pallet_index(22)]
     pub type Treasury = pallet_treasury;
-    #[runtime::pallet_index(24)]
+    #[runtime::pallet_index(23)]
     pub type Democracy = pallet_democracy;
-    #[runtime::pallet_index(25)]
+    #[runtime::pallet_index(24)]
     pub type Council = pallet_collective::Pallet<Runtime, Instance1>;
 
-    #[runtime::pallet_index(26)]
+    #[runtime::pallet_index(25)]
     pub type TechnicalCommittee = pallet_collective::Pallet<Runtime, Instance2>;
 
-    #[runtime::pallet_index(27)]
+    #[runtime::pallet_index(26)]
     pub type Assets = pallet_assets::Pallet<Runtime, Instance1>;
 
-    #[runtime::pallet_index(28)]
+    #[runtime::pallet_index(27)]
     pub type Preimage = pallet_preimage::Pallet<Runtime>;
 
-    #[runtime::pallet_index(29)]
+    #[runtime::pallet_index(28)]
     pub type Scheduler = pallet_scheduler::Pallet<Runtime>;
 
-    #[runtime::pallet_index(30)]
+    #[runtime::pallet_index(29)]
     pub type AssetRate = pallet_asset_rate::Pallet<Runtime>;
 
-    #[runtime::pallet_index(31)]
+    #[runtime::pallet_index(30)]
     pub type Bounties = pallet_bounties::Pallet<Runtime>;
 
-    #[runtime::pallet_index(32)]
+    #[runtime::pallet_index(31)]
     pub type ChildBounties = pallet_child_bounties::Pallet<Runtime>;
+
+    #[runtime::pallet_index(32)]
+    pub type Vesting = pallet_vesting::Pallet<Runtime>;
+
     #[runtime::pallet_index(33)]
+    pub type Multisig = pallet_multisig::Pallet<Runtime>;
+    #[runtime::pallet_index(34)]
     pub type RandomnessCollectiveFlip = pallet_insecure_randomness_collective_flip;
 }

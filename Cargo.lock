@@ -6089,43 +6089,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
-name = "pallet-airdrop"
-version = "0.1.0"
-dependencies = [
-    "frame-benchmarking",
-    "frame-support",
-    "frame-system",
-    "pallet-balances",
-    "parity-scale-codec",
-    "scale-info",
-    "sp-core",
-    "sp-io",
-    "sp-runtime",
-]
-
-[[package]]
-name = "pallet-airdrop-rpc"
-version = "0.1.0"
-dependencies = [
-    "jsonrpsee",
-    "pallet-airdrop-rpc-api",
-    "parity-scale-codec",
-    "serde",
-    "sp-api",
-    "sp-blockchain",
-    "sp-core",
-    "sp-runtime",
-]
-
-[[package]]
-name = "pallet-airdrop-rpc-api"
-version = "0.1.0"
-dependencies = [
-    "parity-scale-codec",
-    "sp-api",
-]
-
-[[package]]
 name = "pallet-asset-conversion"
 version = "22.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk.git?branch=stable2503#4bf2fc181e553c08d478e719e485705cd04af539"
@@ -6492,6 +6455,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-multisig"
+version = "40.1.0"
+source = "git+https://github.com/paritytech/polkadot-sdk.git?branch=stable2503#4bf2fc181e553c08d478e719e485705cd04af539"
+dependencies = [
+    "log",
+    "parity-scale-codec",
+    "polkadot-sdk-frame",
+    "scale-info",
+]
+
+[[package]]
 name = "pallet-nomination-pools"
 version = "38.1.0"
 source = "git+https://github.com/paritytech/polkadot-sdk.git?branch=stable2503#4bf2fc181e553c08d478e719e485705cd04af539"
@@ -6733,6 +6707,20 @@ dependencies = [
     "scale-info",
     "sp-core",
     "sp-io",
+    "sp-runtime",
+]
+
+[[package]]
+name = "pallet-vesting"
+version = "40.1.0"
+source = "git+https://github.com/paritytech/polkadot-sdk.git?branch=stable2503#4bf2fc181e553c08d478e719e485705cd04af539"
+dependencies = [
+    "frame-benchmarking",
+    "frame-support",
+    "frame-system",
+    "log",
+    "parity-scale-codec",
+    "scale-info",
     "sp-runtime",
 ]
 
@@ -13435,8 +13423,6 @@ dependencies = [
     "futures",
     "jsonrpsee",
     "mmr-rpc",
-    "pallet-airdrop-rpc",
-    "pallet-airdrop-rpc-api",
     "pallet-transaction-payment",
     "pallet-transaction-payment-rpc",
     "sc-authority-discovery",
@@ -13497,8 +13483,6 @@ dependencies = [
     "frame-try-runtime",
     "hex",
     "log",
-    "pallet-airdrop",
-    "pallet-airdrop-rpc-api",
     "pallet-asset-rate",
     "pallet-assets",
     "pallet-authority-discovery",
@@ -13517,6 +13501,7 @@ dependencies = [
     "pallet-grandpa",
     "pallet-insecure-randomness-collective-flip",
     "pallet-mmr",
+    "pallet-multisig",
     "pallet-nomination-pools",
     "pallet-offences",
     "pallet-preimage",
@@ -13530,6 +13515,7 @@ dependencies = [
     "pallet-transaction-payment-rpc-runtime-api",
     "pallet-treasury",
     "pallet-utility",
+    "pallet-vesting",
     "parity-scale-codec",
     "scale-info",
     "serde_json",

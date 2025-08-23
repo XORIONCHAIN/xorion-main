@@ -26,8 +26,6 @@ frame-system.workspace = true
 futures = { features = ["thread-pool"], workspace = true }
 jsonrpsee = { features = ["server"], workspace = true }
 mmr-rpc.workspace = true
-pallet-airdrop-rpc.workspace = true
-pallet-airdrop-rpc-api.workspace = true
 pallet-transaction-payment-rpc.default-features = true
 pallet-transaction-payment-rpc.workspace = true
 pallet-transaction-payment.default-features = true
