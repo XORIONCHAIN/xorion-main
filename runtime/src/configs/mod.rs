@@ -23,8 +23,6 @@
 //
 // For more information, please refer to <http://unlicense.org>
 
-pub mod check_nonce;
-
 // Local module imports
 use super::{
     AccountId, AssetRate, Assets, Balance, Balances, Block, BlockNumber, DAYS, EXISTENTIAL_DEPOSIT,
@@ -52,7 +50,7 @@ use frame_support::{
     parameter_types,
     traits::{
         AsEnsureOriginWithArg, ConstU8, ConstU32, ConstU64, ConstU128, EitherOf, EitherOfDiverse,
-        EqualPrivilegeOnly, LinearStoragePrice, Nothing, VariantCountOf,
+        EqualPrivilegeOnly, LinearStoragePrice, Nothing, VariantCountOf, WithdrawReasons,
         fungible::{HoldConsideration, NativeFromLeft, NativeOrWithId, UnionOf},
         tokens::{imbalance::ResolveTo, pay::PayAssetFromAccount},
     },
@@ -71,7 +69,7 @@ use pallet_transaction_payment::{ConstFeeMultiplier, FungibleAdapter, Multiplier
 use sp_core::ConstBool;
 use sp_runtime::{
     FixedPointNumber, FixedU128, Perbill, Percent, Permill, SaturatedConversion, traits,
-    traits::{IdentityLookup, Keccak256, One, OpaqueKeys},
+    traits::{ConvertInto, IdentityLookup, Keccak256, One, OpaqueKeys},
     transaction_validity::TransactionPriority,
 };
 use sp_staking::{EraIndex, SessionIndex};
@@ -625,17 +623,6 @@ parameter_types! {
     pub const MaxAirdropsPerAccount: u32 = 10;
 }
 
-impl pallet_airdrop::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type Currency = Balances;
-    type PalletId = AirdropPalletId;
-    type AirdropAmount = AirdropAmount;
-    type MinimumBalanceThreshold = MinimumBalanceThreshold;
-    type MaxAirdropsPerBlock = MaxAirdropsPerBlock;
-    type CooldownPeriod = CooldownPeriod;
-    type MaxAirdropsPerAccount = MaxAirdropsPerAccount;
-}
-
 pub mod mmr {
     use super::Runtime;
     pub use pallet_mmr::primitives::*;
@@ -1046,4 +1033,41 @@ impl pallet_utility::Config for Runtime {
     type RuntimeCall = RuntimeCall;
     type PalletsOrigin = OriginCaller;
     type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+    pub const MinVestedTransfer: Balance = 100 * UNIT;
+    pub UnvestedFundsAllowedWithdrawReasons: WithdrawReasons =
+        WithdrawReasons::except(WithdrawReasons::TRANSFER | WithdrawReasons::RESERVE);
+}
+
+impl pallet_vesting::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Currency = Balances;
+    type BlockNumberToBalance = ConvertInto;
+    type MinVestedTransfer = MinVestedTransfer;
+    type WeightInfo = pallet_vesting::weights::SubstrateWeight<Runtime>;
+    type UnvestedFundsAllowedWithdrawReasons = UnvestedFundsAllowedWithdrawReasons;
+    type BlockNumberProvider = System;
+    // `VestingInfo` encode length is 36bytes. 28 schedules gets encoded as 1009 bytes, which is the
+    // highest number of schedules that encodes less than 2^10.
+    const MAX_VESTING_SCHEDULES: u32 = 28;
+}
+
+parameter_types! {
+    // One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
+    pub const DepositBase: Balance = deposit(1, 88);
+    // Additional storage item size of 32 bytes.
+    pub const DepositFactor: Balance = deposit(0, 32);
+}
+
+impl pallet_multisig::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeCall = RuntimeCall;
+    type Currency = Balances;
+    type DepositBase = DepositBase;
+    type DepositFactor = DepositFactor;
+    type MaxSignatories = ConstU32<100>;
+    type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
+    type BlockNumberProvider = frame_system::Pallet<Runtime>;
 }

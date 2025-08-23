@@ -1,5 +1,5 @@
 use crate::{
-    benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
+    benchmarking::{RemarkBuilder, TransferKeepAliveBuilder, inherent_benchmark_data},
     chain_spec,
     cli::{Cli, Subcommand},
     service,
@@ -40,6 +40,7 @@ impl SubstrateCli for Cli {
             "dev" => Box::new(chain_spec::development_chain_spec()?),
             "" | "local" => Box::new(chain_spec::local_chain_spec()?),
             "testnet" => Box::new(chain_spec::test_net_chain_spec()?),
+            "mainnet" => Box::new(chain_spec::mainnet_chain_spec()?),
             path =>
                 Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
         })

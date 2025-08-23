@@ -41,10 +41,9 @@ pallet-treasury.workspace = true
 pallet-grandpa.workspace = true
 pallet-bounties.workspace = true
 pallet-child-bounties.workspace = true
-pallet-airdrop.workspace = true
 pallet-private-transactions.workspace = true
-pallet-airdrop-rpc-api.workspace = true
 pallet-mmr.workspace = true
+pallet-multisig.workspace = true
 pallet-statement.workspace = true
 pallet-timestamp.workspace = true
 pallet-transaction-payment-rpc-runtime-api.workspace = true
@@ -116,11 +115,10 @@ std = [
     "pallet-grandpa/std",
     "pallet-treasury/std",
     "pallet-collective/std",
-    "pallet-airdrop/std",
     "pallet-bridge/std",
     "pallet-private-transactions/std",
-    "pallet-airdrop-rpc-api/std",
     "pallet-timestamp/std",
+    "pallet-multisig/std",
     "pallet-transaction-payment-rpc-runtime-api/std",
     "pallet-transaction-payment/std",
     "pallet-election-provider-multi-phase/std",
@@ -158,7 +156,6 @@ runtime-benchmarks = [
     "frame-system/runtime-benchmarks",
     "pallet-balances/runtime-benchmarks",
     "pallet-grandpa/runtime-benchmarks",
-    "pallet-airdrop/runtime-benchmarks",
     "pallet-timestamp/runtime-benchmarks",
     "pallet-transaction-payment/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
@@ -176,7 +173,6 @@ try-runtime = [
     "pallet-staking/try-runtime",
     "pallet-balances/try-runtime",
     "pallet-grandpa/try-runtime",
-    "pallet-airdrop/try-runtime",
     "pallet-timestamp/try-runtime",
     "pallet-transaction-payment/try-runtime",
     "sp-runtime/try-runtime",

@@ -8,7 +8,6 @@
 use std::sync::Arc;
 
 use jsonrpsee::RpcModule;
-use pallet_airdrop_rpc::{AirdropRpcImpl, AirdropRpcServer};
 use sc_client_api::AuxStore;
 use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::{
@@ -87,7 +86,6 @@ where
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BabeApi<Block>,
     C::Api: BlockBuilder<Block>,
-    C::Api: pallet_airdrop_rpc_api::AirdropApi<Block, AccountId, Balance, BlockNumber>,
     P: TransactionPool + 'static,
     SC: SelectChain<Block> + 'static,
     B: sc_client_api::Backend<Block> + Send + Sync + 'static,
@@ -145,9 +143,6 @@ where
     )?;
 
     io.merge(StateMigration::new(client.clone(), backend).into_rpc())?;
-    // Airdrop RPC - Add this
-    io.merge(AirdropRpcImpl::new(client.clone()).into_rpc())?;
-
     io.merge(Dev::new(client).into_rpc())?;
     Ok(io)
 }

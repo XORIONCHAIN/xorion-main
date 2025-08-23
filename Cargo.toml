@@ -8,9 +8,6 @@ edition = "2024"
 [workspace]
 members = [
     "node",
-    "pallets/airdrop",
-    "pallets/airdrop/rpc",
-    "pallets/airdrop/rpc/api",
     "pallets/pallet-bridge",
     "pallets/private-transactions",
     "runtime",
@@ -19,11 +16,8 @@ resolver = "2"
 
 [workspace.dependencies]
 xorion-runtime = { path = "./runtime", default-features = false }
-pallet-airdrop = { path = "./pallets/airdrop", default-features = false }
 pallet-bridge = { path = "./pallets/pallet-bridge", default-features = false }
 pallet-private-transactions = { path = "./pallets/private-transactions", default-features = false }
-pallet-airdrop-rpc = { path = "./pallets/airdrop/rpc", default-features = false }
-pallet-airdrop-rpc-api = { path = "./pallets/airdrop/rpc/api", default-features = false }
 clap = { version = "4.5.13" }
 serde = "1.0.219"
 frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
@@ -35,6 +29,7 @@ mmr-rpc = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "st
 pallet-transaction-payment = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-democracy = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
+pallet-multisig = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-treasury = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-collective = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
 pallet-scheduler = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2503", default-features = false }
