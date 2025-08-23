@@ -32,7 +32,7 @@ A full node stores the complete blockchain history and can serve historical data
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --blocks-pruning archive \
   --rpc-external \
@@ -43,7 +43,7 @@ A full node stores the complete blockchain history and can serve historical data
 
 **Key Parameters:**
 
-- `--chain xorion-testnet-spec.json`: Connects to the Xorion testnet
+- `--chain xorion-spec.json`: Connects to the Xorion testnet
 - `--blocks-pruning archive`: Keeps full blockchain history
 - `--base-path ./xorion-data`: Data directory for blockchain storage
 - `--rpc-external`: Allows external RPC connections
@@ -55,7 +55,7 @@ For light client functionality, use fast sync mode with minimal storage requirem
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-light \
   --sync fast \
   --in-peers 16 \
@@ -118,7 +118,7 @@ an active validator.
 
     ```sh
     ./target/release/xorion-node \
-      --chain xorion-testnet-spec.json \
+      --chain xorion-spec.json \
       --base-path ./xorion-validator \
       --validator \
       --name "YourValidatorName" \
@@ -167,7 +167,7 @@ an active validator.
 ```sh
 # Validator node (private, no RPC)
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-validator \
   --validator \
   --name "YourValidatorName" \
@@ -183,7 +183,7 @@ Optimized for serving RPC requests to applications and wallets.
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-rpc \
   --rpc-external \
   --unsafe-rpc-external \
@@ -205,7 +205,7 @@ For applications requiring full historical data access:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-archive \
   --blocks-pruning archive \
   --state-pruning archive \
@@ -221,7 +221,7 @@ Sentry nodes protect validators by acting as intermediaries:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-sentry \
   --name "SentryNode" \
   --rpc-external \
@@ -238,7 +238,7 @@ Connect to specific boot nodes for network discovery:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --bootnodes /ip4/1.2.3.4/tcp/30333/p2p/12D3KooW... \
   --bootnodes /ip4/5.6.7.8/tcp/30333/p2p/12D3KooW...
@@ -250,7 +250,7 @@ For guaranteed connections to specific trusted nodes:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --reserved-nodes /ip4/1.2.3.4/tcp/30333/p2p/12D3KooW... \
   --reserved-only
@@ -262,7 +262,7 @@ Configure custom ports and addresses:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --port 30334 \
   --rpc-port 9945 \
@@ -303,7 +303,7 @@ Select database backend for optimal performance:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --db-cache 2048 \
   --trie-cache-size 1073741824 \
@@ -316,7 +316,7 @@ Select database backend for optimal performance:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --in-peers 64 \
   --out-peers 16 \
@@ -332,7 +332,7 @@ Send node metrics to telemetry servers:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --telemetry-url 'wss://telemetry.polkadot.io/submit/ 0' \
   --name "YourNodeName"
@@ -344,7 +344,7 @@ Enable Prometheus endpoint for monitoring:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --prometheus-external \
   --prometheus-port 9615
@@ -356,7 +356,7 @@ Configure logging for debugging:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --log runtime=debug,babe=trace \
   --detailed-log-output
@@ -389,7 +389,7 @@ Configure logging for debugging:
 3. **Sync problems**: Clear database and resync
    ```sh
    ./target/release/xorion-node purge-chain \
-     --chain xorion-testnet-spec.json \
+     --chain xorion-spec.json \
      --base-path ./xorion-data
    ```
 
@@ -399,7 +399,7 @@ Run with debug logging for troubleshooting:
 
 ```sh
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --base-path ./xorion-data \
   --log debug \
   --detailed-log-output
@@ -425,7 +425,7 @@ Run with debug logging for troubleshooting:
 ```sh
 # Secure validator setup
 ./target/release/xorion-node \
-  --chain xorion-testnet-spec.json \
+  --chain xorion-spec.json \
   --validator \
   --base-path ./xorion-validator \
   --reserved-only \
