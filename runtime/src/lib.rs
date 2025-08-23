@@ -75,7 +75,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     //   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     //   `spec_version`, and `authoring_version` are the same between Wasm and native.
     // This value is set to 105 - upgrade from previous 104
-    spec_version: 107,
+    spec_version: 1,
     impl_version: 1,
     apis: apis::RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -100,7 +100,7 @@ mod block_times {
     /// slot_duration()`.
     ///
     /// Change this to adjust the block time.
-    pub const MILLI_SECS_PER_BLOCK: u64 = 6000;
+    pub const MILLI_SECS_PER_BLOCK: u64 = prod_or_fast!(6000, 3000);
 
     // NOTE: Currently it is not possible to change the slot duration after the chain has started.
     // Attempting to do so will brick block production.
@@ -246,21 +246,21 @@ mod runtime {
     pub type System = frame_system;
 
     #[runtime::pallet_index(1)]
-    pub type Timestamp = pallet_timestamp;
+    pub type Utility = pallet_utility::Pallet<Runtime>;
 
     #[runtime::pallet_index(2)]
-    pub type Babe = pallet_babe;
+    pub type Timestamp = pallet_timestamp;
 
     #[runtime::pallet_index(3)]
-    pub type Grandpa = pallet_grandpa;
+    pub type Babe = pallet_babe;
+
     #[runtime::pallet_index(4)]
+    pub type Grandpa = pallet_grandpa;
+    #[runtime::pallet_index(5)]
     pub type Balances = pallet_balances;
 
-    #[runtime::pallet_index(5)]
-    pub type TransactionPayment = pallet_transaction_payment;
-
     #[runtime::pallet_index(6)]
-    pub type Sudo = pallet_sudo;
+    pub type TransactionPayment = pallet_transaction_payment;
 
     // Consensus support.
     // Authorship must be before session in order to note author in the correct session and era.
@@ -307,7 +307,33 @@ mod runtime {
     pub type EthereumBridge = pallet_bridge;
     #[runtime::pallet_index(22)]
     pub type Contracts = pallet_contracts;
-
     #[runtime::pallet_index(23)]
+    pub type Treasury = pallet_treasury;
+    #[runtime::pallet_index(24)]
+    pub type Democracy = pallet_democracy;
+    #[runtime::pallet_index(25)]
+    pub type Council = pallet_collective::Pallet<Runtime, Instance1>;
+
+    #[runtime::pallet_index(26)]
+    pub type TechnicalCommittee = pallet_collective::Pallet<Runtime, Instance2>;
+
+    #[runtime::pallet_index(27)]
+    pub type Assets = pallet_assets::Pallet<Runtime, Instance1>;
+
+    #[runtime::pallet_index(28)]
+    pub type Preimage = pallet_preimage::Pallet<Runtime>;
+
+    #[runtime::pallet_index(29)]
+    pub type Scheduler = pallet_scheduler::Pallet<Runtime>;
+
+    #[runtime::pallet_index(30)]
+    pub type AssetRate = pallet_asset_rate::Pallet<Runtime>;
+
+    #[runtime::pallet_index(31)]
+    pub type Bounties = pallet_bounties::Pallet<Runtime>;
+
+    #[runtime::pallet_index(32)]
+    pub type ChildBounties = pallet_child_bounties::Pallet<Runtime>;
+    #[runtime::pallet_index(33)]
     pub type RandomnessCollectiveFlip = pallet_insecure_randomness_collective_flip;
 }

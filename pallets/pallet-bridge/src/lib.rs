@@ -329,6 +329,7 @@ pub mod pallet {
             let bal = T::Currency::free_balance(&pallet_acct);
             ensure!(bal >= amount, Error::<T>::InsufficientBalance);
             T::Currency::transfer(&pallet_acct, &to, amount, AllowDeath)?;
+
             Self::deposit_event(Event::EmergencyWithdraw(to, amount));
             Ok(())
         }

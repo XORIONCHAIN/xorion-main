@@ -1,7 +1,7 @@
 use crate::{
     AccountId, AirdropConfig, BABE_GENESIS_EPOCH_CONFIG, BabeConfig, Balance, BalancesConfig,
     ConfidentialTransactionsConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
-    StakingConfig, SudoConfig, UNIT, configs::MaxActiveValidators,
+    StakingConfig, UNIT, configs::MaxActiveValidators,
 };
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
@@ -21,7 +21,6 @@ use sp_staking::StakerStatus;
 fn testnet_genesis(
     initial_authorities: Vec<(AccountId, AccountId, SessionKeys)>,
     endowed_accounts: Vec<AccountId>,
-    root: AccountId,
     stakers: Vec<Staker>,
 ) -> Value {
     let depo = &include_str!("../../verifier_key.hex")[2..];
@@ -57,7 +56,6 @@ fn testnet_genesis(
             _phantom: Default::default()
         },
         babe: BabeConfig { epoch_config: BABE_GENESIS_EPOCH_CONFIG },
-        sudo: SudoConfig { key: Some(root) },
     })
 }
 
@@ -68,7 +66,6 @@ pub fn development_config_genesis() -> Value {
     testnet_genesis(
         vec![(alice, alice_stash.clone(), alice_session_keys)],
         Sr25519Keyring::well_known().map(|key| key.to_account_id()).collect(),
-        Sr25519Keyring::Alice.to_account_id(),
         vec![validator(alice_stash)],
     )
 }
@@ -83,7 +80,6 @@ pub fn local_config_genesis() -> Value {
             (bob_stash.clone(), bob_stash, bob_session_keys),
         ],
         Sr25519Keyring::well_known().map(|key| key.to_account_id()).collect(),
-        Sr25519Keyring::Alice.to_account_id(),
         vec![validator(alice_stash)],
     )
 }
@@ -106,7 +102,6 @@ pub fn test_net_config_genesis() -> Value {
     testnet_genesis(
         vec![(account.clone(), stash.clone(), session_keys)],
         vec![account.clone(), stash.clone()],
-        account,
         vec![validator(stash)],
     )
 }

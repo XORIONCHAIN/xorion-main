@@ -27,15 +27,20 @@ pallet-authority-discovery.workspace = true
 pallet-babe.workspace = true
 pallet-contracts.workspace = true
 pallet-insecure-randomness-collective-flip.workspace = true
+pallet-assets.workspace = true
 pallet-bridge.workspace = true
 pallet-session.workspace = true
 pallet-authorship.workspace = true
 pallet-staking.workspace = true
 pallet-bags-list.workspace = true
 pallet-offences.workspace = true
+pallet-democracy.workspace = true
+pallet-collective.workspace = true
 pallet-balances.workspace = true
+pallet-treasury.workspace = true
 pallet-grandpa.workspace = true
-pallet-sudo.workspace = true
+pallet-bounties.workspace = true
+pallet-child-bounties.workspace = true
 pallet-airdrop.workspace = true
 pallet-private-transactions.workspace = true
 pallet-airdrop-rpc-api.workspace = true
@@ -47,6 +52,11 @@ pallet-transaction-payment.workspace = true
 pallet-election-provider-multi-phase.workspace = true
 pallet-nomination-pools.workspace = true
 pallet-delegated-staking.workspace = true
+pallet-scheduler.workspace = true
+pallet-utility.workspace = true
+pallet-vesting.workspace = true
+pallet-preimage.workspace = true
+pallet-asset-rate.workspace = true
 scale-info = { features = ["derive", "serde"], workspace = true }
 serde_json = { workspace = true, default-features = false, features = ["alloc"] }
 sp-authority-discovery.workspace = true
@@ -87,17 +97,25 @@ std = [
     "frame-election-provider-support/std",
     "frame-try-runtime?/std",
     "pallet-authority-discovery/std",
+    "pallet-assets/std",
     "pallet-babe/std",
     "pallet-session/std",
     "pallet-authorship/std",
     "pallet-bags-list/std",
-    "pallet-offences/std",
+    "pallet-democracy/std",
+    "pallet-scheduler/std",
+    "pallet-utility/std",
+    "pallet-vesting/std",
+    "pallet-preimage/std",
+    "pallet-asset-rate/std",
+    "pallet-child-bounties/std",
     "pallet-staking/std",
     "pallet-balances/std",
     "pallet-contracts/std",
     "pallet-insecure-randomness-collective-flip/std",
     "pallet-grandpa/std",
-    "pallet-sudo/std",
+    "pallet-treasury/std",
+    "pallet-collective/std",
     "pallet-airdrop/std",
     "pallet-bridge/std",
     "pallet-private-transactions/std",
@@ -140,7 +158,6 @@ runtime-benchmarks = [
     "frame-system/runtime-benchmarks",
     "pallet-balances/runtime-benchmarks",
     "pallet-grandpa/runtime-benchmarks",
-    "pallet-sudo/runtime-benchmarks",
     "pallet-airdrop/runtime-benchmarks",
     "pallet-timestamp/runtime-benchmarks",
     "pallet-transaction-payment/runtime-benchmarks",
@@ -159,7 +176,6 @@ try-runtime = [
     "pallet-staking/try-runtime",
     "pallet-balances/try-runtime",
     "pallet-grandpa/try-runtime",
-    "pallet-sudo/try-runtime",
     "pallet-airdrop/try-runtime",
     "pallet-timestamp/try-runtime",
     "pallet-transaction-payment/try-runtime",
