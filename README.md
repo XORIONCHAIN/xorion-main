@@ -1,4 +1,4 @@
-# Xorion Test Network Connection Guide
+# Xorion Network Connection Guide
 
 This guide explains how to connect to the Xorion network using different node configurations. Whether you want to run a
 full node, validator, light client, or RPC node, this documentation will help you get connected to the live network.
