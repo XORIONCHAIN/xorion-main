@@ -44,6 +44,7 @@ pallet-child-bounties.workspace = true
 pallet-private-transactions.workspace = true
 pallet-mmr.workspace = true
 pallet-multisig.workspace = true
+pallet-launch-claim.workspace = true
 pallet-statement.workspace = true
 pallet-timestamp.workspace = true
 pallet-transaction-payment-rpc-runtime-api.workspace = true
@@ -77,6 +78,7 @@ sp-transaction-pool.workspace = true
 sp-version = { features = ["serde"], workspace = true }
 log = "0.4.27"
 hex = { version = "0.4.3", default-features = false }
+rustc-hex = { version = "2.1.0", default-features = false }
 
 
 [build-dependencies]
@@ -104,6 +106,7 @@ std = [
     "pallet-democracy/std",
     "pallet-scheduler/std",
     "pallet-utility/std",
+    "rustc-hex/std",
     "pallet-vesting/std",
     "pallet-preimage/std",
     "pallet-asset-rate/std",
@@ -125,6 +128,7 @@ std = [
     "pallet-nomination-pools/std",
     "pallet-delegated-staking/std",
     "pallet-mmr/std",
+    "pallet-launch-claim/std",
     "pallet-statement/std",
     "scale-info/std",
     "serde_json/std",

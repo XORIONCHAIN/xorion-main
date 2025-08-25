@@ -1,7 +1,7 @@
 [package]
-name = "pallet-bridge"
+name = "pallet-launch-claim"
 version = "0.1.0"
-description = "A pallet for xor <-> wxor"
+description = "A pallet for to claim xor from launch"
 license.workspace = true
 authors.workspace = true
 homepage.workspace = true

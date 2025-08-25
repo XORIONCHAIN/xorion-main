@@ -769,12 +769,12 @@ impl pallet_assets::Config<Instance1> for Runtime {
 }
 
 parameter_types! {
-    pub const LaunchPeriod: BlockNumber = prod_or_fast!(14 * 24 * 60 * MINUTES, MINUTES); // 14 days
-    pub const VotingPeriod: BlockNumber = prod_or_fast!(14 * 24 * 60 * MINUTES, MINUTES);
-    pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES / 2);
+    pub const LaunchPeriod: BlockNumber = prod_or_fast!(2 * 24 * 60 * MINUTES, MINUTES); // 14 days
+    pub const VotingPeriod: BlockNumber = prod_or_fast!(5 * 24 * 60 * MINUTES, MINUTES);
+    pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!(1 * 24 * 60 * MINUTES, MINUTES / 2);
     pub const MinimumDeposit: Balance = 100 * UNIT;
-    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(15 * 24 * 60 * MINUTES, 2* MINUTES);
-    pub const CooloffPeriod: BlockNumber = prod_or_fast!(14 * 24 * 60 * MINUTES, MINUTES);
+    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(2 * 24 * 60 * MINUTES, 2* MINUTES);
+    pub const CooloffPeriod: BlockNumber = prod_or_fast!(7 * 24 * 60 * MINUTES, MINUTES);
     pub const MaxProposals: u32 = 1000;
 }
 
@@ -789,7 +789,7 @@ parameter_types! {
     pub const MaximumReasonLength: u32 = 300;
     pub const MaxApprovals: u32 = 100;
     pub const MaxBalance: Balance = Balance::MAX;
-    pub const SpendPayoutPeriod: BlockNumber = prod_or_fast!(30 * DAYS, MINUTES);
+    pub const SpendPayoutPeriod: BlockNumber = prod_or_fast!(15 * DAYS, MINUTES);
 }
 
 pub type NativeAndAssets =
@@ -878,7 +878,7 @@ impl pallet_democracy::Config for Runtime {
 }
 
 parameter_types! {
-    pub const CouncilMotionDuration: BlockNumber = prod_or_fast!(5 * DAYS, MINUTES);
+    pub const CouncilMotionDuration: BlockNumber = prod_or_fast!(DAYS, MINUTES);
     pub const CouncilMaxProposals: u32 = 100;
     pub const CouncilMaxMembers: u32 = 100;
     pub const ProposalDepositOffset: Balance = ExistentialDeposit::get() + ExistentialDeposit::get();
@@ -1070,4 +1070,9 @@ impl pallet_multisig::Config for Runtime {
     type MaxSignatories = ConstU32<100>;
     type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
     type BlockNumberProvider = frame_system::Pallet<Runtime>;
+}
+
+impl pallet_launch_claim::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Currency = Balances;
 }

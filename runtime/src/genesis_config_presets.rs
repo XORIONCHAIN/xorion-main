@@ -1,7 +1,8 @@
 use crate::{
     AccountId, BABE_GENESIS_EPOCH_CONFIG, BabeConfig, Balance, BalancesConfig,
-    ConfidentialTransactionsConfig, GRAND, RuntimeGenesisConfig, SessionConfig, SessionKeys,
-    StakingConfig, UNIT, VestingConfig, configs::MaxActiveValidators,
+    ConfidentialTransactionsConfig, EthereumBridgeConfig, GRAND, LaunchClaimConfig,
+    RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, UNIT, VestingConfig,
+    configs::MaxActiveValidators,
 };
 use alloc::{vec, vec::Vec};
 use frame_support::{PalletId, build_struct_json_patch};
@@ -10,6 +11,7 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{
+    H160,
     crypto::{Ss58Codec, get_public_from_string_or_panic},
     sr25519,
 };
@@ -96,11 +98,20 @@ pub fn mainnet_config_genesis() -> Value {
         )
         .unwrap(),
     };
+    let session_keys_2 = SessionKeys {
+        babe: BabeId::from_ss58check("5Ehz9iqnJHB9jFdHv2u3RApkAHjVt4H4mQqXp28u7UNCBMsc").unwrap(),
+        grandpa: GrandpaId::from_ss58check("5FUUCvWLaxPucyiLKEcSLP375aLWmW6rjVvwUZUURJceZ8kA")
+            .unwrap(),
+        authority_discovery: AuthorityDiscoveryId::from_ss58check(
+            "5ECKhzrkb9bneuJcRBhME1vMfUPE4KTKSxw3WKGdBeyeS9TK",
+        )
+        .unwrap(),
+    };
 
     // 5% unlocked at the Token Generation Event (TGE), with the remaining 95% vesting linearly over
     // 24 months.
     let thirty_five_percent_account =
-        AccountId::from_ss58check("5HNjQFCpXTaxN8a47JJLjznXTyZjWoGrpHD4Rq9bNPSmftxA").unwrap();
+        AccountId::from_ss58check("5E1UShyFSmbm2ocCgzLSuWKdcKXZPeXphYYdUeZJbWtduoex").unwrap();
 
     let thirty_five_percent_account_total_bal = 350_000_000 * UNIT;
 
@@ -125,6 +136,18 @@ pub fn mainnet_config_genesis() -> Value {
         AccountId::from_ss58check("5Ft5w1myw1GhkJq6CJb6MnqeCGd57gExmzv2DzBXiwejeoGR").unwrap();
     let future_use_total_bal = 50_000_000 * UNIT;
 
+    fn from_str(input: &str) -> H160 {
+        let input = input.strip_prefix("0x").unwrap_or(input);
+        let mut iter = rustc_hex::FromHexIter::new(input);
+        let mut result = H160::zero();
+        for byte in result.as_mut() {
+            *byte = iter.next().unwrap().unwrap();
+        }
+        if iter.next().is_some() {
+            panic!("Self::Err::InvalidHexLength")
+        }
+        result
+    }
     build_struct_json_patch!(RuntimeGenesisConfig {
         balances: BalancesConfig {
             balances: vec![
@@ -138,15 +161,18 @@ pub fn mainnet_config_genesis() -> Value {
             ]
         },
         session: SessionConfig {
-            keys: vec![(
-                thirty_five_percent_account.clone(),
-                thirty_five_percent_account.clone(),
-                session_keys
-            )]
+            keys: vec![
+                (
+                    thirty_five_percent_account.clone(),
+                    thirty_five_percent_account.clone(),
+                    session_keys
+                ),
+                (fifteen_percent_account.clone(), fifteen_percent_account.clone(), session_keys_2)
+            ]
         },
         staking: StakingConfig {
             validator_count: MaxActiveValidators::get(),
-            minimum_validator_count: 1,
+            minimum_validator_count: 2,
             stakers: vec![(
                 thirty_five_percent_account.clone(),
                 thirty_five_percent_account.clone(),
@@ -157,6 +183,18 @@ pub fn mainnet_config_genesis() -> Value {
         confidential_transactions: ConfidentialTransactionsConfig {
             deposit_vk: depo,
             transfer_vk: trans,
+            _phantom: Default::default()
+        },
+        launch_claim: LaunchClaimConfig {
+            funding_source_account: Some(launch_pad_account.clone()),
+            owner: Some(launch_pad_account.clone()),
+        },
+        ethereum_bridge: EthereumBridgeConfig {
+            relayers: vec![
+                from_str("0x43a603f19fa345eCE0b94F3E759C424b2892F540"),
+                from_str("0xF553da68d83cd57DD1804BB0aAd7d4D591024FFE"),
+                from_str("0x0c2752f5fc2204982D18F285cB6A55f39Db22A57"),
+            ],
             _phantom: Default::default()
         },
         babe: BabeConfig { epoch_config: BABE_GENESIS_EPOCH_CONFIG },

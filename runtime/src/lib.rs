@@ -334,6 +334,9 @@ mod runtime {
 
     #[runtime::pallet_index(33)]
     pub type Multisig = pallet_multisig::Pallet<Runtime>;
+
     #[runtime::pallet_index(34)]
+    pub type LaunchClaim = pallet_launch_claim;
+    #[runtime::pallet_index(35)]
     pub type RandomnessCollectiveFlip = pallet_insecure_randomness_collective_flip;
 }
