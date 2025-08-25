@@ -160,6 +160,27 @@ pub mod pallet {
         TooManyRelayers,
     }
 
+    #[pallet::genesis_config]
+    pub struct GenesisConfig<T: Config> {
+        pub relayers: Vec<H160>,
+        pub _phantom: PhantomData<T>,
+    }
+
+    impl<T: Config> Default for GenesisConfig<T> {
+        fn default() -> Self {
+            Self { relayers: Default::default(), _phantom: Default::default() }
+        }
+    }
+    #[pallet::genesis_build]
+    impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
+        fn build(&self) {
+            let bounded_relayers: BoundedVec<H160, ConstU32<MAX_RELAYERS>> =
+                self.relayers.clone().try_into().unwrap();
+
+            Relayers::<T>::put(&bounded_relayers);
+        }
+    }
+
     // Dispatchable functions
     #[pallet::call]
     impl<T: Config> Pallet<T> {
