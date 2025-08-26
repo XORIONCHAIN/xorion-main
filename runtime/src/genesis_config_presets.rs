@@ -131,10 +131,10 @@ pub fn mainnet_config_genesis() -> Value {
     let ten_percent_account_total_bal = 100_000_000 * UNIT;
     let launch_pad_account =
         AccountId::from_ss58check("5H9V5nTeVwEKykvUDvfGQKA4mVqLNeGUDNL9kaA4Qt1EPYdj").unwrap();
-    let launch_pad_total_bal = 50_000_000 * UNIT;
+    let launch_pad_total_bal = 20_000_000 * UNIT;
     let future_use_account =
         AccountId::from_ss58check("5Ft5w1myw1GhkJq6CJb6MnqeCGd57gExmzv2DzBXiwejeoGR").unwrap();
-    let future_use_total_bal = 50_000_000 * UNIT;
+    let future_use_total_bal = 80_000_000 * UNIT;
 
     fn from_str(input: &str) -> H160 {
         let input = input.strip_prefix("0x").unwrap_or(input);

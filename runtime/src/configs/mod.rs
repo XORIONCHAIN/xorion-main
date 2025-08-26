@@ -121,10 +121,7 @@ impl frame_system::Config for Runtime {
 }
 
 parameter_types! {
-    pub const EpochDuration: u64 = prod_or_fast!(
-        EPOCH_DURATION_IN_SLOTS as u64,
-        1 * MINUTES as u64
-    );
+    pub const EpochDuration: u64 = prod_or_fast!(EPOCH_DURATION_IN_SLOTS, MINUTES);
     pub const ExpectedBlockTime: Moment = MILLI_SECS_PER_BLOCK;
     pub const ReportLongevity: u64 =
         BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
@@ -206,13 +203,13 @@ parameter_types! {
         .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
         .build_or_panic();
     // phase durations. 1/4 of the last session for each.
-    pub SignedPhase: u32 = prod_or_fast!(
+    pub SignedPhase: u64 = prod_or_fast!(
         EPOCH_DURATION_IN_SLOTS / 4,
-        (1 * MINUTES).min(EpochDuration::get().saturated_into::<u32>() / 2)
+        (1 * MINUTES).min(EpochDuration::get().saturated_into::<u64>() / 2)
     );
-    pub UnsignedPhase: u32 = prod_or_fast!(
+    pub UnsignedPhase: u64 = prod_or_fast!(
         EPOCH_DURATION_IN_SLOTS / 4,
-        (1 * MINUTES).min(EpochDuration::get().saturated_into::<u32>() / 2)
+        (1 * MINUTES).min(EpochDuration::get().saturated_into::<u64>() / 2)
     );
 
     // signed config
@@ -278,8 +275,8 @@ impl pallet_election_provider_multi_phase::MinerConfig for Runtime {
 
 pub struct MaybeSignedPhase;
 
-impl Get<u32> for MaybeSignedPhase {
-    fn get() -> u32 {
+impl Get<u64> for MaybeSignedPhase {
+    fn get() -> u64 {
         // 1 day = 4 eras -> 1 week = 28 eras. We want to disable signed phase once a week to test
         // the fallback unsigned phase is able to compute elections on Westend.
         if pallet_staking::CurrentEra::<Runtime>::get().unwrap_or(1) % 28 == 0 {
@@ -769,12 +766,12 @@ impl pallet_assets::Config<Instance1> for Runtime {
 }
 
 parameter_types! {
-    pub const LaunchPeriod: BlockNumber = prod_or_fast!(2 * 24 * 60 * MINUTES, MINUTES); // 14 days
-    pub const VotingPeriod: BlockNumber = prod_or_fast!(5 * 24 * 60 * MINUTES, MINUTES);
+    pub const LaunchPeriod: BlockNumber = prod_or_fast!(36 * 60 * MINUTES, MINUTES); // 14 days
+    pub const VotingPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES);
     pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!(1 * 24 * 60 * MINUTES, MINUTES / 2);
     pub const MinimumDeposit: Balance = 100 * UNIT;
-    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(2 * 24 * 60 * MINUTES, 2* MINUTES);
-    pub const CooloffPeriod: BlockNumber = prod_or_fast!(7 * 24 * 60 * MINUTES, MINUTES);
+    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(DAYS, 2* MINUTES);
+    pub const CooloffPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES);
     pub const MaxProposals: u32 = 1000;
 }
 
@@ -912,7 +909,7 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
     >;
 }
 parameter_types! {
-    pub const TechnicalMotionDuration: BlockNumber = 6 * HOURS;
+    pub const TechnicalMotionDuration: BlockNumber = 3 * HOURS;
     pub const TechnicalMaxProposals: u32 = 100;
     pub const TechnicalMaxMembers: u32 = 100;
 }
@@ -1059,6 +1056,8 @@ parameter_types! {
     pub const DepositBase: Balance = deposit(1, 88);
     // Additional storage item size of 32 bytes.
     pub const DepositFactor: Balance = deposit(0, 32);
+
+    pub const VestingPeriod: BlockNumber = 6*30 * DAYS;
 }
 
 impl pallet_multisig::Config for Runtime {
@@ -1075,4 +1074,5 @@ impl pallet_multisig::Config for Runtime {
 impl pallet_launch_claim::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
+    type VestingPeriod = VestingPeriod;
 }
