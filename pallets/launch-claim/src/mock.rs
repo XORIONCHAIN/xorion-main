@@ -72,11 +72,13 @@ parameter_types! {
     pub const BridgePalletId: PalletId = PalletId(*b"brdglock");
     pub const RelayerThreshold: u32 = 0; // require 0 signature for mock
     pub const MaxSignatures: u32 = 10;   // max 10 signatures per release
+    pub const VestingPeriod: u64 = 60 * 60 * 24 * 30 * 6; // ~6 months worth of blocks
 }
 
 impl crate::Config for Test {
     type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
+    type VestingPeriod = VestingPeriod;
 }
 
 pub const XOR: u128 = 10_u128.pow(18);

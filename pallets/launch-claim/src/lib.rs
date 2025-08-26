@@ -14,7 +14,9 @@ pub mod pallet {
         traits::{Currency, ExistenceRequirement},
     };
     use frame_system::pallet_prelude::*;
-    use sp_runtime::{ArithmeticError, traits::UniqueSaturatedInto};
+    use sp_runtime::{
+        ArithmeticError, SaturatedConversion, Saturating, traits::UniqueSaturatedInto,
+    };
     use sp_std::prelude::*;
 
     // Define the Balance type from the Currency trait
@@ -36,6 +38,9 @@ pub mod pallet {
 
         /// The currency type for managing balances.
         type Currency: Currency<Self::AccountId>;
+
+        #[pallet::constant]
+        type VestingPeriod: Get<BlockNumberFor<Self>>;
     }
 
     /// The origin that is allowed to perform administrative actions.
@@ -48,11 +53,25 @@ pub mod pallet {
     #[pallet::getter(fn is_activated)]
     pub type Activated<T: Config> = StorageValue<_, bool, ValueQuery>;
 
+    #[derive(
+        Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen, Default,
+    )]
+    pub struct ClaimInfo<Balance, BlockNumber> {
+        pub total: Balance,     // total entitled
+        pub claimed: Balance,   // already claimed
+        pub start: BlockNumber, // when vesting starts
+    }
+
     /// Storage map from an account ID to the balance they are entitled to claim.
     #[pallet::storage]
     #[pallet::getter(fn claims)]
-    pub type Claims<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, BalanceOf<T>, ValueQuery>;
+    pub type Claims<T: Config> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        ClaimInfo<BalanceOf<T>, BlockNumberFor<T>>,
+        ValueQuery,
+    >;
 
     /// Storage map to maintain the set of authorized relayers.
     #[pallet::storage]
@@ -196,12 +215,14 @@ pub mod pallet {
             let usdt_normalized = usdt_amount.saturating_mul(10u128.pow(12)); // 6 → 18 decimals
 
             let tokens = usdt_normalized.checked_mul(rate).ok_or(ArithmeticError::Underflow)?;
-            let current = Claims::<T>::get(&who);
-            let new_total = current + tokens.unique_saturated_into();
+            let now = <frame_system::Pallet<T>>::block_number();
 
-            Claims::<T>::insert(&who, new_total);
-            Self::deposit_event(Event::ClaimAdded { who, total_amount: new_total, rate });
-            Ok(())
+            Claims::<T>::try_mutate(who.clone(), |current| {
+                current.total += tokens.unique_saturated_into();
+                current.start = now;
+                Self::deposit_event(Event::ClaimAdded { who, total_amount: current.total, rate });
+                Ok(())
+            })
         }
 
         /// Claim the full amount available for the caller.
@@ -210,26 +231,44 @@ pub mod pallet {
         pub fn claim_full(origin: OriginFor<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::is_activated(), Error::<T>::NotActivated);
+            let now = <frame_system::Pallet<T>>::block_number();
 
-            // Take the claim from storage, which removes it.
-            let claimable_amount = Claims::<T>::take(&who);
+            Claims::<T>::try_mutate(who.clone(), |claim_info| -> DispatchResult {
+                let half = claim_info.total / 2u32.saturated_into();
 
-            // Transfer funds from the pallet's account to the claimant.
-            let source_account = Self::funding_source().ok_or(Error::<T>::NotActivated)?;
+                // vested portion
+                let vesting_duration: BlockNumberFor<T> = T::VestingPeriod::get();
+                let elapsed = now.saturating_sub(claim_info.start);
+                let elapsed: BalanceOf<T> =
+                    elapsed.saturated_into::<u128>().unique_saturated_into();
+                let vesting_duration: BalanceOf<T> =
+                    vesting_duration.saturated_into::<u128>().unique_saturated_into();
+                let vested = half.min(half * elapsed / vesting_duration);
 
-            ensure!(
-                T::Currency::free_balance(&source_account) > claimable_amount,
-                Error::<T>::InsufficientLaunchpadBalance
-            );
-            T::Currency::transfer(
-                &source_account,
-                &who,
-                claimable_amount,
-                ExistenceRequirement::KeepAlive,
-            )?;
+                let unlocked = half + vested;
+                let claimable_amount = unlocked.saturating_sub(claim_info.claimed);
 
-            Self::deposit_event(Event::Claimed { who, amount: claimable_amount });
-            Ok(())
+                ensure!(claimable_amount > Zero::zero(), Error::<T>::InsufficientClaim);
+
+                // Transfer funds from the pallet's account to the claimant.
+                let source_account = Self::funding_source().ok_or(Error::<T>::NotActivated)?;
+
+                ensure!(
+                    T::Currency::free_balance(&source_account) > claimable_amount,
+                    Error::<T>::InsufficientLaunchpadBalance
+                );
+                T::Currency::transfer(
+                    &source_account,
+                    &who,
+                    claimable_amount,
+                    ExistenceRequirement::KeepAlive,
+                )?;
+
+                claim_info.claimed += claimable_amount;
+                Self::deposit_event(Event::Claimed { who, amount: claimable_amount });
+
+                Ok(())
+            })
         }
 
         /// Claim a specific amount.
@@ -238,11 +277,26 @@ pub mod pallet {
         pub fn claim(origin: OriginFor<T>, amount_to_claim: BalanceOf<T>) -> DispatchResult {
             let who = ensure_signed(origin)?;
             ensure!(Self::is_activated(), Error::<T>::NotActivated);
+            let now = <frame_system::Pallet<T>>::block_number();
 
             // Mutate the claim in storage.
-            Claims::<T>::try_mutate(&who, |claim_balance| -> DispatchResult {
-                let current_claim = *claim_balance;
-                ensure!(amount_to_claim <= current_claim, Error::<T>::InsufficientClaim);
+            Claims::<T>::try_mutate(&who, |claim_info| -> DispatchResult {
+                let half = claim_info.total / 2u32.into();
+
+                // calculate vested portion
+                let vesting_duration: BlockNumberFor<T> = T::VestingPeriod::get(); // 6 months worth of blocks
+                let elapsed = now.saturating_sub(claim_info.start);
+                let elapsed: BalanceOf<T> =
+                    elapsed.saturated_into::<u128>().unique_saturated_into();
+                let vesting_duration: BalanceOf<T> =
+                    vesting_duration.saturated_into::<u128>().unique_saturated_into();
+                let vested = half.min(half * elapsed / vesting_duration);
+
+                // total unlocked = 50% upfront + vested
+                let unlocked = half + vested;
+
+                let claimable = unlocked.saturating_sub(claim_info.claimed);
+                ensure!(amount_to_claim <= claimable, Error::<T>::InsufficientClaim);
 
                 // Transfer funds from the source account.
                 let source_account = Self::funding_source().ok_or(Error::<T>::NotActivated)?;
@@ -257,10 +311,7 @@ pub mod pallet {
                     ExistenceRequirement::KeepAlive,
                 )?;
 
-                let new_claim = current_claim - amount_to_claim;
-
-                // If the remaining balance is zero, remove the entry. Otherwise, update it.
-                *claim_balance = new_claim;
+                claim_info.claimed += amount_to_claim;
                 Self::deposit_event(Event::Claimed { who: who.clone(), amount: amount_to_claim });
                 Ok(())
             })
