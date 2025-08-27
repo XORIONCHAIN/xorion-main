@@ -28,7 +28,7 @@ use super::{
     AccountId, AssetRate, Assets, Balance, Balances, Block, BlockNumber, DAYS, EXISTENTIAL_DEPOSIT,
     HOURS, Hash, Nonce, OriginCaller, PalletInfo, Preimage, Runtime, RuntimeCall, RuntimeEvent,
     RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, SLOT_DURATION, Scheduler,
-    System, Treasury, UNIT, VERSION,
+    System, Treasury, VERSION, XOR,
 };
 // Substrate and Polkadot dependencies
 use crate::{
@@ -601,11 +601,11 @@ parameter_types! {
 
     /// The amount of tokens to airdrop per claim
     /// 1000 xor tokens
-    pub const AirdropAmount: Balance = 1000 * UNIT;
+    pub const AirdropAmount: Balance = 1000 * XOR;
 
     /// Minimum balance threshold to be considered "unfunded"
     /// Users with balance below this can claim airdrops
-    pub const MinimumBalanceThreshold: Balance = 100 * UNIT;
+    pub const MinimumBalanceThreshold: Balance = 100 * XOR;
 
     /// Maximum number of airdrops allowed per block
     /// Prevents spam and controls distribution rate
@@ -734,11 +734,11 @@ impl pallet_contracts::Config for Runtime {
 }
 
 parameter_types! {
-    pub const AssetDeposit: Balance = 100 * UNIT;
-    pub const ApprovalDeposit: Balance = 1 * UNIT;
+    pub const AssetDeposit: Balance = 100 * XOR;
+    pub const ApprovalDeposit: Balance = 1 * XOR;
     pub const StringLimit: u32 = 50;
-    pub const MetadataDepositBase: Balance = 10 * UNIT;
-    pub const MetadataDepositPerByte: Balance = 1 * UNIT;
+    pub const MetadataDepositBase: Balance = 10 * XOR;
+    pub const MetadataDepositPerByte: Balance = 1 * XOR;
 }
 
 impl pallet_assets::Config<Instance1> for Runtime {
@@ -751,7 +751,7 @@ impl pallet_assets::Config<Instance1> for Runtime {
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
     type ForceOrigin = EnsureRoot<AccountId>;
     type AssetDeposit = AssetDeposit;
-    type AssetAccountDeposit = ConstU128<UNIT>;
+    type AssetAccountDeposit = ConstU128<XOR>;
     type MetadataDepositBase = MetadataDepositBase;
     type MetadataDepositPerByte = MetadataDepositPerByte;
     type ApprovalDeposit = ApprovalDeposit;
@@ -769,7 +769,7 @@ parameter_types! {
     pub const LaunchPeriod: BlockNumber = prod_or_fast!(36 * 60 * MINUTES, MINUTES); // 14 days
     pub const VotingPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES);
     pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!(1 * 24 * 60 * MINUTES, MINUTES / 2);
-    pub const MinimumDeposit: Balance = 100 * UNIT;
+    pub const MinimumDeposit: Balance = 100 * XOR;
     pub const EnactmentPeriod: BlockNumber = prod_or_fast!(DAYS, 2* MINUTES);
     pub const CooloffPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES);
     pub const MaxProposals: u32 = 1000;
@@ -780,7 +780,7 @@ parameter_types! {
     pub const Burn: Permill = Permill::from_percent(50);
     pub const TipCountdown: BlockNumber = 1 * DAYS;
     pub const TipFindersFee: Percent = Percent::from_percent(20);
-    pub const TipReportDepositBase: Balance = 1 * UNIT;
+    pub const TipReportDepositBase: Balance = 1 * XOR;
     pub const DataDepositPerByte: Balance = 1 * CENTS;
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
     pub const MaximumReasonLength: u32 = 300;
@@ -817,7 +817,7 @@ impl pallet_treasury::Config for Runtime {
     type BlockNumberProvider = System;
 }
 parameter_types! {
-    pub const Budget: Balance = 10_000 * UNIT;
+    pub const Budget: Balance = 10_000 * XOR;
     pub TreasuryAccount: AccountId = Treasury::account_id();
 }
 
@@ -968,7 +968,7 @@ impl pallet_preimage::Config for Runtime {
         Balances,
         PreimageHoldReason,
         LinearStoragePrice<
-            ConstU128<UNIT>,  // Configures the base deposit of storing some data.
+            ConstU128<XOR>,   // Configures the base deposit of storing some data.
             ConstU128<CENTS>, // Configures the per-byte deposit of storing some data.
             Balance,
         >,
@@ -989,11 +989,11 @@ impl pallet_asset_rate::Config for Runtime {
 
 parameter_types! {
     pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
-    pub const BountyValueMinimum: Balance = 5 * UNIT;
-    pub const BountyDepositBase: Balance = 1 * UNIT;
+    pub const BountyValueMinimum: Balance = 5 * XOR;
+    pub const BountyDepositBase: Balance = 1 * XOR;
     pub const CuratorDepositMultiplier: Permill = Permill::from_percent(50);
-    pub const CuratorDepositMin: Balance = 1 * UNIT;
-    pub const CuratorDepositMax: Balance = 100 * UNIT;
+    pub const CuratorDepositMin: Balance = 1 * XOR;
+    pub const CuratorDepositMax: Balance = 100 * XOR;
     pub const BountyDepositPayoutDelay: BlockNumber = 1 * DAYS;
     pub const BountyUpdatePeriod: BlockNumber = 14 * DAYS;
 }
@@ -1015,7 +1015,7 @@ impl pallet_bounties::Config for Runtime {
 }
 
 parameter_types! {
-    pub const ChildBountyValueMinimum: Balance = 1 * UNIT;
+    pub const ChildBountyValueMinimum: Balance = 1 * XOR;
 }
 
 impl pallet_child_bounties::Config for Runtime {
@@ -1033,7 +1033,7 @@ impl pallet_utility::Config for Runtime {
 }
 
 parameter_types! {
-    pub const MinVestedTransfer: Balance = 100 * UNIT;
+    pub const MinVestedTransfer: Balance = 100 * XOR;
     pub UnvestedFundsAllowedWithdrawReasons: WithdrawReasons =
         WithdrawReasons::except(WithdrawReasons::TRANSFER | WithdrawReasons::RESERVE);
 }

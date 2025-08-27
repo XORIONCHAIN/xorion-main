@@ -120,8 +120,8 @@ pub const DAYS: BlockNumber = HOURS * 24;
 
 pub const BLOCK_HASH_COUNT: BlockNumber = 2400;
 
-// Unit = the base number of indivisible units for balances
-pub const UNIT: Balance = 100 * CENTS;
+// XOR = the base number of indivisible units for balances
+pub const XOR: Balance = 100 * CENTS;
 pub const CENTS: Balance = 1_000 * MILLI_UNIT;
 pub const MILLI_UNIT: Balance = 1_000 * MICRO_UNIT;
 pub const MICRO_UNIT: Balance = 10_000_000_000;
