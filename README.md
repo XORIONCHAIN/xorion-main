@@ -1,3 +1,6 @@
+
+[![OpenSSF Scorecard](https://github.com/XORIONCHAIN/xorion-main/actions/workflows/scorecard.yml/badge.svg)](https://github.com/XORIONCHAIN/xorion-main/actions/workflows/scorecard.yml)
+
 # Xorion Network Connection Guide
 
 This guide explains how to connect to the Xorion network using different node configurations. Whether you want to run a
