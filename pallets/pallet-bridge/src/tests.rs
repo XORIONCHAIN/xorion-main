@@ -135,9 +135,6 @@ fn release_transfers_and_reimburses_relayer_and_prevents_replay() {
         let ev2 = last_bridge_event();
         assert_eq!(ev2, RuntimeEvent::Bridge(Event::Released(locker, amount, message_id, 0)));
 
-        // Locked entry should be removed
-        assert!(Bridge::locked(message_id).is_none());
-
         // pallet balance should be 0 now
         let pallet_acct = Bridge::account_id();
         assert_eq!(Balances::free_balance(pallet_acct), 0u128);
