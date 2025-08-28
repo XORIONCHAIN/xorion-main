@@ -2,7 +2,7 @@ require("@nomicfoundation/hardhat-toolbox");
 // Install dotenv: npm install dotenv
 require('dotenv').config();
 
-const SEPOLIA_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/7UCLPIqgu6mIK1JQuiC25";
+const SEPOLIA_RPC_URL = "process.env.SEPOLIA_RPC_URL";
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "your-wallet-private-key";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 
