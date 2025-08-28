@@ -8,7 +8,7 @@ const USDT: u128 = 1_000_000;
 fn add_claim_works() {
     new_test_ext().execute_with(|| {
         // Relayer adds claim for user 1
-        assert_ok!(LaunchClaim::add_claim(RuntimeOrigin::signed(10), 1, 1 * USDT));
+        assert_ok!(LaunchClaim::add_claim(RuntimeOrigin::signed(10), 1, USDT));
 
         // User 1 should now have 20 claimable tokens
         assert_eq!(LaunchClaim::claims(1).total, 20 * XOR);
