@@ -129,15 +129,11 @@ fn release_transfers_and_reimburses_relayer_and_prevents_replay() {
             locker, // recipient is locker in this test for simplicity
             amount,
             vec![],
-            None
         ));
 
         // Released event emitted
         let ev2 = last_bridge_event();
-        assert_eq!(ev2, RuntimeEvent::Bridge(Event::Released(locker, amount, message_id)));
-
-        // Locked entry should be removed
-        assert!(Bridge::locked(message_id).is_none());
+        assert_eq!(ev2, RuntimeEvent::Bridge(Event::Released(locker, amount, message_id, 0)));
 
         // pallet balance should be 0 now
         let pallet_acct = Bridge::account_id();
@@ -155,7 +151,6 @@ fn release_transfers_and_reimburses_relayer_and_prevents_replay() {
                 locker,
                 amount,
                 vec![],
-                None
             ),
             Error::<Test>::MessageAlreadyProcessed
         );
@@ -171,8 +166,6 @@ fn top_up_relayer_fund_and_emergency_withdraw_works_and_pause_blocks_ops() {
 
         // top up RelayerFund by depositor (transfer into pallet)
         assert_ok!(Bridge::top_up_relayer_fund(RuntimeOrigin::signed(depositor), amount));
-        let fund = Bridge::relayer_fund();
-        assert_eq!(fund, amount);
 
         // emergency withdraw by root
         let before_admin = Balances::free_balance(admin);

@@ -1,7 +1,7 @@
 use crate::{
     AccountId, BABE_GENESIS_EPOCH_CONFIG, BabeConfig, Balance, BalancesConfig,
     ConfidentialTransactionsConfig, EthereumBridgeConfig, GRAND, LaunchClaimConfig,
-    RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, UNIT, VestingConfig,
+    RuntimeGenesisConfig, SessionConfig, SessionKeys, StakingConfig, VestingConfig, XOR,
     configs::MaxActiveValidators,
 };
 use alloc::{vec, vec::Vec};
@@ -108,34 +108,34 @@ pub fn mainnet_config_genesis() -> Value {
         .unwrap(),
     };
 
+    const TOTAL_SUPPLY: Balance = 1_000_000_000 * XOR; // 1 billion
     // 5% unlocked at the Token Generation Event (TGE), with the remaining 95% vesting linearly over
     // 24 months.
     let thirty_five_percent_account =
         AccountId::from_ss58check("5E1UShyFSmbm2ocCgzLSuWKdcKXZPeXphYYdUeZJbWtduoex").unwrap();
 
-    let thirty_five_percent_account_total_bal = 350_000_000 * UNIT;
+    let thirty_five_percent_account_total_bal = (TOTAL_SUPPLY * 35) / 100;
 
     let twenty_percent_account =
         AccountId::from_ss58check("5CY5FuoSBX1rowaVqQDzZYBhq3RW31MQrhiFsmZHXjxgZ1NR").unwrap();
-    let twenty_percent_account_total_bal = 200_000_000 * UNIT;
+    let twenty_percent_account_total_bal = (TOTAL_SUPPLY * 20) / 100;
 
     let fifteen_percent_account =
         AccountId::from_ss58check("5CDB73ww5cBbsdk9BBu8oDpZZ5YGooeFUyARai38ug4btfHE").unwrap();
-    let fifteen_percent_account_total_bal = 150_000_000 * UNIT;
+    let fifteen_percent_account_total_bal = (TOTAL_SUPPLY * 15) / 100;
 
     let validator_rewards_account = STAKING_PALLET_ID.into_account_truncating();
-    let validator_rewards = 100_000_000 * UNIT;
+    let validator_rewards = (TOTAL_SUPPLY * 10) / 100;
 
     let ten_percent_account =
         AccountId::from_ss58check("5GL2PxADUxncYrbM9rBH4zYyCsEpez9K7QitrBoNAkcSNC4t").unwrap();
-    let ten_percent_account_total_bal = 100_000_000 * UNIT;
+    let ten_percent_account_total_bal = (TOTAL_SUPPLY * 10) / 100;
     let launch_pad_account =
         AccountId::from_ss58check("5H9V5nTeVwEKykvUDvfGQKA4mVqLNeGUDNL9kaA4Qt1EPYdj").unwrap();
-    let launch_pad_total_bal = 20_000_000 * UNIT;
+    let launch_pad_total_bal = (TOTAL_SUPPLY * 2) / 100;
     let future_use_account =
         AccountId::from_ss58check("5Ft5w1myw1GhkJq6CJb6MnqeCGd57gExmzv2DzBXiwejeoGR").unwrap();
-    let future_use_total_bal = 80_000_000 * UNIT;
-
+    let future_use_total_bal = (TOTAL_SUPPLY * 8) / 100;
     fn from_str(input: &str) -> H160 {
         let input = input.strip_prefix("0x").unwrap_or(input);
         let mut iter = rustc_hex::FromHexIter::new(input);
@@ -212,20 +212,17 @@ pub fn mainnet_config_genesis() -> Value {
                 ),
                 (
                     twenty_percent_account, // who
-                    5_259_600,              // start block
+                    0,                      // start block
                     15_778_800,             /* duration from start The 36-month vesting duration
                                              * in blocks. */
-                    0 // There is no liquid portion. The full amount is vested.
+                    (twenty_percent_account_total_bal * 15) / 100 // 15% initial
                 ),
                 (
                     fifteen_percent_account, // who
-                    0,                       // start block
+                    1_314_900,               // start block 3 months
                     10_519_200,              // length ~24 months from start
-                    (fifteen_percent_account_total_bal * 5) / 100  /* liquid - Number of
-                                              * units which
-                                              * can be spent before
-                                              * vesting
-                                              * begins. */
+                    0                        /* There is no liquid portion. The full amount is
+                                              * vested. */
                 ),
                 (
                     ten_percent_account, // who
