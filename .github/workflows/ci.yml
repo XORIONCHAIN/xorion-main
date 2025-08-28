@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v4
 
@@ -42,7 +42,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v4
 
@@ -52,8 +52,8 @@ jobs:
         uses: ./.github/actions/ubuntu-dependencies
 
       - name: Build the node individually in release mode
-        run: cargo build --package xorion-node --release
-        timeout-minutes: 90
+        run: cargo build --release
+        timeout-minutes: 120
 
       - name: Make sure the node is producing blocks
         run: |
