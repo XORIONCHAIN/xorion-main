@@ -83,8 +83,10 @@ pub mod pallet {
     pub enum Event<T: Config> {
         /// The claims process has been activated.
         ClaimsActivated,
-        /// A new claim has been added for an account. [who, amount]
+        /// A new claim has been added for an account. [who, total_amount]
         ClaimAdded { who: T::AccountId, total_amount: BalanceOf<T>, rate: u128 },
+        /// A claim has been veto for an account. [who, total_amount]
+        VetoClaimChange { who: T::AccountId, total_amount: BalanceOf<T> },
         /// An account has successfully claimed their tokens. [who, amount]
         Claimed { who: T::AccountId, amount: BalanceOf<T> },
         /// A new relayer has been added. [who]
@@ -317,8 +319,24 @@ pub mod pallet {
             })
         }
 
-        /// Update exchange rate (only owner)
+        /// Veto Remove Claim (only owner)
         #[pallet::call_index(6)]
+        #[pallet::weight(T::DbWeight::get().reads_writes(0, 1))]
+        pub fn remove_claim(
+            origin: OriginFor<T>,
+            who: T::AccountId,
+            amount: BalanceOf<T>,
+        ) -> DispatchResult {
+            Self::ensure_owner(origin)?;
+            Claims::<T>::try_mutate(who.clone(), |current| {
+                current.total -= amount;
+                Self::deposit_event(Event::VetoClaimChange { who, total_amount: current.total });
+                Ok(())
+            })
+        }
+
+        /// Update exchange rate (only owner)
+        #[pallet::call_index(7)]
         #[pallet::weight(T::DbWeight::get().reads_writes(0, 1))]
         pub fn set_exchange_rate(origin: OriginFor<T>, new_rate: u128) -> DispatchResult {
             Self::ensure_owner(origin)?;

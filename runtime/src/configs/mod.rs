@@ -767,10 +767,10 @@ impl pallet_assets::Config<Instance1> for Runtime {
 
 parameter_types! {
     pub const LaunchPeriod: BlockNumber = prod_or_fast!(36 * 60 * MINUTES, MINUTES); // 14 days
-    pub const VotingPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES);
-    pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!(1 * 24 * 60 * MINUTES, MINUTES / 2);
+    pub const VotingPeriod: BlockNumber = prod_or_fast!(2 * 24 * 60 * MINUTES, MINUTES);
+    pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!(6 * 60 * MINUTES, MINUTES / 2);
     pub const MinimumDeposit: Balance = 100 * XOR;
-    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(DAYS, 2* MINUTES);
+    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(3 * HOURS, 2* MINUTES);
     pub const CooloffPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES);
     pub const MaxProposals: u32 = 1000;
 }
