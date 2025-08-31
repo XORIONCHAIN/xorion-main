@@ -1,5 +1,6 @@
 
-[![OpenSSF Scorecard](https://github.com/XORIONCHAIN/xorion-main/actions/workflows/scorecard.yml/badge.svg)](https://github.com/XORIONCHAIN/xorion-main/actions/workflows/scorecard.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/XORIONCHAIN/xorion-main/badge)](https://securityscorecards.dev/viewer/?uri=github.com/XORIONCHAIN/xorion-main)
+
 
 # Xorion Network Connection Guide
 
