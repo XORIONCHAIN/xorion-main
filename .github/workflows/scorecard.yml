@@ -1,21 +1,20 @@
-name: Scorecard analysis
+name: Scorecard
 
 on:
-  branch_protection_rule:
-  schedule:
-    - cron: '30 1 * * 0'  # weekly run
   push:
-    branches: ["*"]  # adjust if your default branch is 'main'
-  workflow_dispatch:
+    branches: ["**"]       # Run on all branches
+  schedule:
+    - cron: '30 1 * * 0'   # Weekly run
+  workflow_dispatch:       # Manual trigger
 
 permissions:
   security-events: write
   id-token: write
   contents: read
+  actions: read
 
 jobs:
   analysis:
-    name: Scorecard
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,8 +25,9 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-        env:
-          GITHUB_TOKEN: ${{ secrets.SCORECARD_TOKEN }} # Use your PAT here
+          publish_results: true
+          repo_token: ${{ secrets.SCORECARD_TOKEN }}
+        continue-on-error: true
 
       - name: Upload SARIF results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
