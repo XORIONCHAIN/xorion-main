@@ -715,12 +715,12 @@ impl pallet_contracts::Config for Runtime {
     type DepositPerItem = DepositPerItem;
     type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
-    type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
-    type MaxStorageKeyLen = ConstU32<128>;
-    type MaxTransientStorageSize = ConstU32<{ 1 * 1024 * 1024 }>;
+    type MaxCodeLen = ConstU32<{ 2 * 1024 * 1024 }>;
+    type MaxStorageKeyLen = ConstU32<{ 1024 * 1024 }>;
+    type MaxTransientStorageSize = ConstU32<{ 100 * 1024 * 1024 }>;
     type MaxDelegateDependencies = ConstU32<32>;
     type UnsafeUnstableInterface = ConstBool<false>;
-    type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
+    type MaxDebugBufferLen = ConstU32<{ 200 * 1024 * 1024 }>;
     type UploadOrigin = EnsureSigned<Self::AccountId>;
     type InstantiateOrigin = EnsureSigned<Self::AccountId>;
     #[cfg(not(feature = "runtime-benchmarks"))]
@@ -766,12 +766,12 @@ impl pallet_assets::Config<Instance1> for Runtime {
 }
 
 parameter_types! {
-    pub const LaunchPeriod: BlockNumber = prod_or_fast!(36 * 60 * MINUTES, MINUTES); // 14 days
-    pub const VotingPeriod: BlockNumber = prod_or_fast!(2 * 24 * 60 * MINUTES, MINUTES);
-    pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!(6 * 60 * MINUTES, MINUTES / 2);
+    pub const LaunchPeriod: BlockNumber = prod_or_fast!(HOURS, MINUTES); // 12 hours
+    pub const VotingPeriod: BlockNumber = prod_or_fast!(HOURS, MINUTES);
+    pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!( 30 * MINUTES, MINUTES / 2);
     pub const MinimumDeposit: Balance = 100 * XOR;
-    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(3 * HOURS, 2* MINUTES);
-    pub const CooloffPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES);
+    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(3 * MINUTES, 2* MINUTES);
+    pub const CooloffPeriod: BlockNumber = prod_or_fast!( 6* MINUTES, MINUTES);
     pub const MaxProposals: u32 = 1000;
 }
 
@@ -1075,4 +1075,237 @@ impl pallet_launch_claim::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
     type VestingPeriod = VestingPeriod;
+}
+
+impl pallet_evm::Config for Runtime {
+    type AccountProvider = pallet_evm::FrameSystemAccountProvider<Self>;
+    type FeeCalculator = BaseFee;
+    type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
+    type WeightPerGas = WeightPerGas;
+    type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping<Self>;
+    type CallOrigin = pallet_evm::EnsureAddressRoot<AccountId>;
+    type WithdrawOrigin = pallet_evm::EnsureAddressNever<AccountId>;
+    type AddressMapping = pallet_evm::IdentityAddressMapping;
+    type Currency = Balances;
+    type RuntimeEvent = RuntimeEvent;
+    type PrecompilesType = FrontierPrecompiles<Self>;
+    type PrecompilesValue = PrecompilesValue;
+    // vban custom chain id
+    type ChainId = ConstU64<9956>;
+    type BlockGasLimit = BlockGasLimit;
+    type Runner = pallet_evm::runner::stack::Runner<Self>;
+    type OnChargeTransaction = ();
+    type OnCreate = ();
+    type FindAuthor = BabeFindAuthor<Babe>;
+    type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+    type GasLimitStorageGrowthRatio = ();
+    type Timestamp = Timestamp;
+    type WeightInfo = pallet_evm::weights::SubstrateWeight<Self>;
+}
+
+parameter_types! {
+    pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;
+}
+
+impl pallet_ethereum::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type StateRoot = pallet_ethereum::IntermediateStateRoot<Self::Version>;
+    type PostLogContent = PostBlockAndTxnHashes;
+    type ExtraDataLength = ConstU32<30>;
+}
+
+impl fp_self_contained::SelfContainedCall for RuntimeCall {
+    type SignedInfo = H160;
+
+    fn is_self_contained(&self) -> bool {
+        match self {
+            RuntimeCall::Ethereum(call) => call.is_self_contained(),
+            RuntimeCall::System(_) => false,
+            RuntimeCall::Timestamp(_) => false,
+            RuntimeCall::Babe(_) => false,
+            RuntimeCall::Balances(_) => false,
+            RuntimeCall::Staking(_) => false,
+            RuntimeCall::Session(_) => false,
+            RuntimeCall::ElectionProviderMultiPhase(_) => false,
+            RuntimeCall::ImOnline(_) => false,
+            RuntimeCall::Council(_) => false,
+            RuntimeCall::Treasury(_) => false,
+            RuntimeCall::ChildBounties(_) => false,
+            RuntimeCall::BagsList(_) => false,
+            RuntimeCall::NominationPools(_) => false,
+            RuntimeCall::Grandpa(_) => false,
+            RuntimeCall::Bounties(_) => false,
+            RuntimeCall::Sudo(_) => false,
+            RuntimeCall::Contracts(_) => false,
+            RuntimeCall::Username(_) => false,
+            RuntimeCall::EVM(_) => false,
+            RuntimeCall::BaseFee(_) => false,
+            RuntimeCall::HotfixSufficients(_) => false,
+            RuntimeCall::IpfsCore(_) => false,
+            RuntimeCall::IpfsAddress(_) => false,
+            RuntimeCall::AssetRate(_) | RuntimeCall::Assets(_) => false,
+        }
+    }
+
+    fn check_self_contained(&self) -> Option<Result<Self::SignedInfo, TransactionValidityError>> {
+        match self {
+            RuntimeCall::Ethereum(call) => call.check_self_contained(),
+            RuntimeCall::System(_) => None,
+            RuntimeCall::Timestamp(_) => None,
+            RuntimeCall::Babe(_) => None,
+            RuntimeCall::Balances(_) => None,
+            RuntimeCall::Staking(_) => None,
+            RuntimeCall::Session(_) => None,
+            RuntimeCall::ElectionProviderMultiPhase(_) => None,
+            RuntimeCall::ImOnline(_) => None,
+            RuntimeCall::Council(_) => None,
+            RuntimeCall::Treasury(_) => None,
+            RuntimeCall::ChildBounties(_) => None,
+            RuntimeCall::BagsList(_) => None,
+            RuntimeCall::NominationPools(_) => None,
+            RuntimeCall::Grandpa(_) => None,
+            RuntimeCall::Bounties(_) => None,
+            RuntimeCall::Sudo(_) => None,
+            RuntimeCall::Contracts(_) => None,
+            RuntimeCall::Username(_) => None,
+            RuntimeCall::EVM(_) => None,
+            RuntimeCall::BaseFee(_) => None,
+            RuntimeCall::HotfixSufficients(_) => None,
+            RuntimeCall::IpfsCore(_) => None,
+            RuntimeCall::IpfsAddress(_) => None,
+            RuntimeCall::AssetRate(_) | RuntimeCall::Assets(_) => None,
+        }
+    }
+
+    fn validate_self_contained(
+        &self,
+        info: &Self::SignedInfo,
+        dispatch_info: &DispatchInfoOf<RuntimeCall>,
+        len: usize,
+    ) -> Option<TransactionValidity> {
+        match self {
+            RuntimeCall::Ethereum(call) => call.validate_self_contained(info, dispatch_info, len),
+            RuntimeCall::System(_) => None,
+            RuntimeCall::Timestamp(_) => None,
+            RuntimeCall::Babe(_) => None,
+            RuntimeCall::Balances(_) => None,
+            RuntimeCall::Staking(_) => None,
+            RuntimeCall::Session(_) => None,
+            RuntimeCall::ElectionProviderMultiPhase(_) => None,
+            RuntimeCall::ImOnline(_) => None,
+            RuntimeCall::Council(_) => None,
+            RuntimeCall::Treasury(_) => None,
+            RuntimeCall::ChildBounties(_) => None,
+            RuntimeCall::BagsList(_) => None,
+            RuntimeCall::NominationPools(_) => None,
+            RuntimeCall::Grandpa(_) => None,
+            RuntimeCall::Bounties(_) => None,
+            RuntimeCall::Sudo(_) => None,
+            RuntimeCall::Contracts(_) => None,
+            RuntimeCall::Username(_) => None,
+            RuntimeCall::EVM(_) => None,
+            RuntimeCall::BaseFee(_) => None,
+            RuntimeCall::HotfixSufficients(_) => None,
+            RuntimeCall::IpfsCore(_) => None,
+            RuntimeCall::IpfsAddress(_) => None,
+            RuntimeCall::AssetRate(_) | RuntimeCall::Assets(_) => None,
+        }
+    }
+
+    fn pre_dispatch_self_contained(
+        &self,
+        info: &Self::SignedInfo,
+        dispatch_info: &DispatchInfoOf<RuntimeCall>,
+        len: usize,
+    ) -> Option<Result<(), TransactionValidityError>> {
+        match self {
+            RuntimeCall::Ethereum(call) =>
+                call.pre_dispatch_self_contained(info, dispatch_info, len),
+            RuntimeCall::System(_) => None,
+            RuntimeCall::Timestamp(_) => None,
+            RuntimeCall::Babe(_) => None,
+            RuntimeCall::Balances(_) => None,
+            RuntimeCall::Staking(_) => None,
+            RuntimeCall::Session(_) => None,
+            RuntimeCall::ElectionProviderMultiPhase(_) => None,
+            RuntimeCall::ImOnline(_) => None,
+            RuntimeCall::Council(_) => None,
+            RuntimeCall::Treasury(_) => None,
+            RuntimeCall::ChildBounties(_) => None,
+            RuntimeCall::BagsList(_) => None,
+            RuntimeCall::NominationPools(_) => None,
+            RuntimeCall::Grandpa(_) => None,
+            RuntimeCall::Bounties(_) => None,
+            RuntimeCall::Sudo(_) => None,
+            RuntimeCall::Contracts(_) => None,
+            RuntimeCall::Username(_) => None,
+            RuntimeCall::EVM(_) => None,
+            RuntimeCall::BaseFee(_) => None,
+            RuntimeCall::HotfixSufficients(_) => None,
+            RuntimeCall::IpfsCore(_) => None,
+            RuntimeCall::IpfsAddress(_) => None,
+            RuntimeCall::AssetRate(_) | RuntimeCall::Assets(_) => None,
+        }
+    }
+
+    fn apply_self_contained(
+        self,
+        info: Self::SignedInfo,
+    ) -> Option<sp_runtime::DispatchResultWithInfo<PostDispatchInfoOf<Self>>> {
+        match self {
+            call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
+                Some(call.dispatch(RuntimeOrigin::from(
+                    pallet_ethereum::RawOrigin::EthereumTransaction(info),
+                ))),
+            RuntimeCall::Ethereum(_) => None,
+            RuntimeCall::System(_) => None,
+            RuntimeCall::Timestamp(_) => None,
+            RuntimeCall::Babe(_) => None,
+            RuntimeCall::Balances(_) => None,
+            RuntimeCall::Staking(_) => None,
+            RuntimeCall::Session(_) => None,
+            RuntimeCall::ElectionProviderMultiPhase(_) => None,
+            RuntimeCall::ImOnline(_) => None,
+            RuntimeCall::Council(_) => None,
+            RuntimeCall::Treasury(_) => None,
+            RuntimeCall::ChildBounties(_) => None,
+            RuntimeCall::BagsList(_) => None,
+            RuntimeCall::NominationPools(_) => None,
+            RuntimeCall::Grandpa(_) => None,
+            RuntimeCall::Bounties(_) => None,
+            RuntimeCall::Sudo(_) => None,
+            RuntimeCall::Contracts(_) => None,
+            RuntimeCall::Username(_) => None,
+            RuntimeCall::EVM(_) => None,
+            RuntimeCall::BaseFee(_) => None,
+            RuntimeCall::HotfixSufficients(_) => None,
+            RuntimeCall::IpfsCore(_) => None,
+            RuntimeCall::IpfsAddress(_) => None,
+            RuntimeCall::AssetRate(_) | RuntimeCall::Assets(_) => None,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct TransactionConverter;
+
+impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
+    fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
+        UncheckedExtrinsic::new_unsigned(
+            pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
+        )
+    }
+}
+
+impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConverter {
+    fn convert_transaction(
+        &self,
+        transaction: pallet_ethereum::Transaction,
+    ) -> opaque::UncheckedExtrinsic {
+        let extrinsic = UncheckedExtrinsic::new_unsigned(
+            pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
+        );
+        let encoded = extrinsic.encode();
+        opaque::UncheckedExtrinsic::decode(&mut &encoded[..]).unwrap_or_default()
+    }
 }
