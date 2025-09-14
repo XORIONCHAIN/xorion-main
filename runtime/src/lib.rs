@@ -75,7 +75,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     //   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     //   `spec_version`, and `authoring_version` are the same between Wasm and native.
     // This value is set to 105 - upgrade from previous 104
-    spec_version: 1,
+    spec_version: 3,
     impl_version: 1,
     apis: apis::RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -337,6 +337,11 @@ mod runtime {
 
     #[runtime::pallet_index(34)]
     pub type LaunchClaim = pallet_launch_claim;
+
     #[runtime::pallet_index(35)]
+    pub type EVM = pallet_evm;
+    #[runtime::pallet_index(36)]
+    pub type BaseFee = pallet_base_fee;
+    #[runtime::pallet_index(37)]
     pub type RandomnessCollectiveFlip = pallet_insecure_randomness_collective_flip;
 }

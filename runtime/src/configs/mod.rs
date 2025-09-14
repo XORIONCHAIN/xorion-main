@@ -23,6 +23,8 @@
 //
 // For more information, please refer to <http://unlicense.org>
 
+mod precompiles;
+
 // Local module imports
 use super::{
     AccountId, AssetRate, Assets, Balance, Balances, Block, BlockNumber, DAYS, EXISTENTIAL_DEPOSIT,
@@ -715,12 +717,12 @@ impl pallet_contracts::Config for Runtime {
     type DepositPerItem = DepositPerItem;
     type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
-    type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
-    type MaxStorageKeyLen = ConstU32<128>;
-    type MaxTransientStorageSize = ConstU32<{ 1 * 1024 * 1024 }>;
+    type MaxCodeLen = ConstU32<{ 2 * 1024 * 1024 }>;
+    type MaxStorageKeyLen = ConstU32<{ 1024 * 1024 }>;
+    type MaxTransientStorageSize = ConstU32<{ 100 * 1024 * 1024 }>;
     type MaxDelegateDependencies = ConstU32<32>;
     type UnsafeUnstableInterface = ConstBool<false>;
-    type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
+    type MaxDebugBufferLen = ConstU32<{ 200 * 1024 * 1024 }>;
     type UploadOrigin = EnsureSigned<Self::AccountId>;
     type InstantiateOrigin = EnsureSigned<Self::AccountId>;
     #[cfg(not(feature = "runtime-benchmarks"))]
@@ -766,12 +768,12 @@ impl pallet_assets::Config<Instance1> for Runtime {
 }
 
 parameter_types! {
-    pub const LaunchPeriod: BlockNumber = prod_or_fast!(36 * 60 * MINUTES, MINUTES); // 14 days
-    pub const VotingPeriod: BlockNumber = prod_or_fast!(2 * 24 * 60 * MINUTES, MINUTES);
-    pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!(6 * 60 * MINUTES, MINUTES / 2);
+    pub const LaunchPeriod: BlockNumber = prod_or_fast!(HOURS, MINUTES); // 12 hours
+    pub const VotingPeriod: BlockNumber = prod_or_fast!(HOURS, MINUTES);
+    pub const FastTrackVotingPeriod: BlockNumber = prod_or_fast!( 30 * MINUTES, MINUTES / 2);
     pub const MinimumDeposit: Balance = 100 * XOR;
-    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(3 * HOURS, 2* MINUTES);
-    pub const CooloffPeriod: BlockNumber = prod_or_fast!(3 * 24 * 60 * MINUTES, MINUTES);
+    pub const EnactmentPeriod: BlockNumber = prod_or_fast!(3 * MINUTES, 2* MINUTES);
+    pub const CooloffPeriod: BlockNumber = prod_or_fast!( 6* MINUTES, MINUTES);
     pub const MaxProposals: u32 = 1000;
 }
 
@@ -1075,4 +1077,43 @@ impl pallet_launch_claim::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
     type VestingPeriod = VestingPeriod;
+}
+
+const BLOCK_GAS_LIMIT: u64 = 75_000_000;
+const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
+/// The maximum storage growth per block in bytes.
+const MAX_STORAGE_GROWTH: u64 = 400 * 1024;
+
+parameter_types! {
+    pub BlockGasLimit: U256 = U256::from(BLOCK_GAS_LIMIT);
+    pub const GasLimitPovSizeRatio: u64 = BLOCK_GAS_LIMIT.saturating_div(MAX_POV_SIZE);
+    pub const GasLimitStorageGrowthRatio: u64 = BLOCK_GAS_LIMIT.saturating_div(MAX_STORAGE_GROWTH);
+    pub PrecompilesValue: FrontierPrecompiles<Runtime> = FrontierPrecompiles::<_>::new();
+    pub WeightPerGas: Weight = Weight::from_parts(weight_per_gas(BLOCK_GAS_LIMIT, NORMAL_DISPATCH_RATIO, WEIGHT_MILLISECS_PER_BLOCK), 0);
+}
+
+impl pallet_evm::Config for Runtime {
+    type AccountProvider = pallet_evm::FrameSystemAccountProvider<Self>;
+    type FeeCalculator = BaseFee;
+    type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
+    type WeightPerGas = WeightPerGas;
+    type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping<Self>;
+    type CallOrigin = pallet_evm::EnsureAddressRoot<AccountId>;
+    type WithdrawOrigin = pallet_evm::EnsureAddressNever<AccountId>;
+    type AddressMapping = pallet_evm::IdentityAddressMapping;
+    type Currency = Balances;
+    type RuntimeEvent = RuntimeEvent;
+    type PrecompilesType = FrontierPrecompiles<Self>;
+    type PrecompilesValue = PrecompilesValue;
+    // vban custom chain id
+    type ChainId = ConstU64<9956>;
+    type BlockGasLimit = BlockGasLimit;
+    type Runner = pallet_evm::runner::stack::Runner<Self>;
+    type OnChargeTransaction = ();
+    type OnCreate = ();
+    type FindAuthor = BabeFindAuthor<Babe>;
+    type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+    type GasLimitStorageGrowthRatio = ();
+    type Timestamp = Timestamp;
+    type WeightInfo = pallet_evm::weights::SubstrateWeight<Self>;
 }

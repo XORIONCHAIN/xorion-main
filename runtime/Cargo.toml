@@ -80,6 +80,15 @@ log = "0.4.27"
 hex = { version = "0.4.3", default-features = false }
 rustc-hex = { version = "2.1.0", default-features = false }
 
+#EVM Dependencies
+fp-evm = { workspace = true }
+fp-rpc = { workspace = true }
+pallet-evm-precompile-modexp = { workspace = true }
+pallet-evm-precompile-sha3fips = { workspace = true }
+pallet-evm-precompile-simple = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-ethereum = { workspace = true }
+pallet-base-fee = { workspace = true }
 
 [build-dependencies]
 substrate-wasm-builder = { optional = true, workspace = true, default-features = true }
@@ -105,10 +114,13 @@ std = [
     "pallet-bags-list/std",
     "pallet-democracy/std",
     "pallet-scheduler/std",
+    "pallet-base-fee/std",
     "pallet-utility/std",
+    "pallet-ethereum/std",
     "rustc-hex/std",
     "pallet-vesting/std",
     "pallet-preimage/std",
+    "pallet-evm/std",
     "pallet-asset-rate/std",
     "pallet-child-bounties/std",
     "pallet-staking/std",
@@ -133,6 +145,8 @@ std = [
     "scale-info/std",
     "serde_json/std",
     "sp-api/std",
+    "fp-rpc/std",
+    "fp-evm/std",
     "sp-authority-discovery/std",
     "sp-block-builder/std",
     "sp-consensus-babe/std",
