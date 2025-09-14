@@ -132,9 +132,10 @@ fp-ethereum = { git = "https://github.com/paritytech/frontier", branch = "stable
 fp-evm = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
 fp-rpc = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
 fp-self-contained = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
-pallet-ethereum = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
+
 pallet-base-fee = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
 pallet-dynamic-fee = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
+pallet-ethereum = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
 pallet-evm = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
 pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }
 pallet-evm-precompile-modexp = { git = "https://github.com/paritytech/frontier", branch = "stable2503", default-features = false }

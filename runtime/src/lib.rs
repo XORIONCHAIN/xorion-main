@@ -337,6 +337,11 @@ mod runtime {
 
     #[runtime::pallet_index(34)]
     pub type LaunchClaim = pallet_launch_claim;
+
     #[runtime::pallet_index(35)]
+    pub type EVM = pallet_evm;
+    #[runtime::pallet_index(36)]
+    pub type BaseFee = pallet_base_fee;
+    #[runtime::pallet_index(37)]
     pub type RandomnessCollectiveFlip = pallet_insecure_randomness_collective_flip;
 }
